@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tourstack — Operations</title>
+<style>
+  :root{
+    --paper:#F3F4F0; --card:#FFFFFF; --ink:#1B2620; --mute:#606963; --line:#D9DDD6;
+    --route:#2F6B4F; --route-soft:#DDE9E2; --warn:#AA3724; --warn-soft:#F7DED8;
+    --ee:#3D5A80; --tint:#EEF1EC;
+    --r:6px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.45 "Avenir Next","Segoe UI",system-ui,-apple-system,sans-serif}
+  button,input,select,textarea{font:inherit;color:inherit}
+  button{cursor:pointer}
+  a{color:var(--route)}
+
+  .app{display:grid;grid-template-columns:230px 1fr;min-height:100vh}
+  @media (max-width:760px){.app{grid-template-columns:1fr}.rail{position:sticky;top:0;z-index:5;border-right:0;border-bottom:1px solid var(--line);flex-direction:row;overflow-x:auto;padding:10px 12px}.rail h1{display:none}.rail .nav{display:flex;gap:6px}.rail .foot{display:none}}
+
+  /* rail */
+  .rail{background:var(--card);border-right:1px solid var(--line);padding:22px 16px;display:flex;flex-direction:column;gap:18px}
+  .rail h1{font-size:17px;font-weight:600;margin:0 0 4px 6px;letter-spacing:-.01em}
+  .rail h1 small{display:block;color:var(--mute);font-weight:400;font-size:13px}
+  .nav{display:flex;flex-direction:column;gap:2px}
+  .nav button{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;text-align:left;background:none;border:0;border-radius:var(--r);padding:8px 10px;white-space:nowrap}
+  .nav button:hover{background:var(--tint)}
+  .nav button.on{background:var(--route-soft);color:var(--route);font-weight:600}
+  .nav .cnt{font-size:12px;color:var(--mute);background:var(--tint);border-radius:10px;padding:1px 7px;min-width:22px;text-align:center}
+  .nav button.on .cnt{background:#fff}
+  .nav .grp{color:var(--mute);font-size:12px;margin:10px 0 2px 10px}
+  .nav button.grp{background:none;border:0;padding:0;width:auto;text-align:left;cursor:pointer}
+  .nav button.grp:hover{color:var(--ink)}
+  .nav button.grp.on{color:var(--route);font-weight:600}
+  .foot{margin-top:auto;display:flex;gap:6px;flex-wrap:wrap}
+  .foot button{font-size:12px;color:var(--mute);background:none;border:1px solid var(--line);border-radius:var(--r);padding:5px 8px}
+  .foot button:hover{color:var(--ink)}
+
+  /* main */
+  .main{padding:26px 30px 60px;max-width:960px}
+  @media (max-width:760px){.main{padding:18px 14px 60px}}
+  .head{display:flex;align-items:baseline;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:18px}
+  .head h2{font-size:26px;font-weight:600;margin:0;letter-spacing:-.02em}
+  .head .sub{color:var(--mute)}
+
+  /* the 50-hour track — the one memorable element */
+  .track{margin:6px 0 26px}
+  .track .bar{position:relative;height:34px;background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;display:flex}
+  .track .seg{height:100%;display:flex;align-items:center;padding:0 8px;font-size:12px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;border-right:1px solid rgba(255,255,255,.35)}
+  .track .seg.thin{padding:0}
+  .track .cap{position:absolute;top:0;bottom:0;width:2px;background:var(--ink)}
+  .track .legend{display:flex;justify-content:space-between;color:var(--mute);font-size:13px;margin-top:6px}
+  .track .over{color:var(--warn);font-weight:600}
+
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media (max-width:760px){.grid{grid-template-columns:1fr}}
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px 18px}
+  .panel h3{font-size:14px;margin:0 0 10px;font-weight:600}
+  .panel h3 span{color:var(--mute);font-weight:400;margin-left:6px}
+
+  /* info block */
+  .facts{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:14px}
+  .facts dt{color:var(--mute)}
+  .facts dd{margin:0}
+  .facts input,.facts textarea{width:100%;border:0;border-bottom:1px dashed transparent;background:none;padding:0;outline:none;resize:vertical}
+  .facts input:hover,.facts textarea:hover,.facts input:focus,.facts textarea:focus{border-bottom-color:var(--line)}
+  .facts textarea{min-height:56px;line-height:1.4}
+
+  /* tasks */
+  .add{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;align-items:center}
+  .add input[type=text]{flex:1;min-width:160px;border:1px solid var(--line);border-radius:var(--r);padding:8px 10px;background:var(--paper);outline:none}
+  .add input[type=text]:focus{border-color:var(--route)}
+  .add select,.add input[type=date]{border:1px solid var(--line);border-radius:var(--r);padding:7px 8px;background:#fff;font-size:13px}
+  .add input[type=number]{width:78px;border:1px solid var(--line);border-radius:var(--r);padding:7px 8px;background:#fff;font-size:13px}
+  .add .fld{display:flex;align-items:center;gap:4px;font-size:12px;color:var(--mute)}
+  .add button{background:var(--route);color:#fff;border:0;border-radius:var(--r);padding:8px 14px;font-weight:600}
+  .add button:hover{filter:brightness(.95)}
+  .tasks{list-style:none;margin:0;padding:0}
+  .task{display:grid;grid-template-columns:20px 1fr auto;gap:10px;align-items:start;padding:8px 0;border-top:1px solid var(--line)}
+  .task:first-child{border-top:0}
+  .task input[type=checkbox]{margin:3px 0 0;accent-color:var(--route);width:16px;height:16px}
+  .task .t{display:flex;flex-direction:column;gap:2px}
+  .task .t .txt{outline:none}
+  .task .t .txt:focus{background:var(--tint);border-radius:3px}
+  .task .meta{display:flex;gap:8px;font-size:12px;color:var(--mute);flex-wrap:wrap;align-items:center}
+  .task .meta .who{background:var(--tint);border-radius:10px;padding:0 7px}
+  .task .meta .due.late{color:var(--warn);font-weight:600}
+  .task .meta .nolog{background:var(--warn-soft);color:var(--warn);border:0;border-radius:10px;padding:1px 8px;font:inherit;font-size:12px;font-weight:600;cursor:pointer}
+  .task .meta .nolog:hover{filter:brightness(.95)}
+  .task .meta .cl{color:var(--route)}
+  .task .meta .est{background:var(--tint);border-radius:10px;padding:0 4px 0 7px;display:flex;align-items:center;gap:2px}
+  .task .meta .est input{width:26px;border:0;background:none;outline:none;text-align:right;padding:0;font:inherit;color:inherit;-moz-appearance:textfield}
+  .task .meta .est input::-webkit-outer-spin-button,.task .meta .est input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+  .task .meta .est input:focus{color:var(--ink)}
+  .task .meta .logged{color:var(--route)}
+  .task .meta .logged.over{color:var(--warn);font-weight:600}
+  .task.done .txt{text-decoration:line-through;color:var(--mute)}
+  .task .x{background:none;border:0;color:var(--mute);font-size:16px;line-height:1;padding:2px 4px;opacity:0;border-radius:3px}
+  .task:hover .x,.task .x:focus{opacity:1}
+  .task .x:hover{color:var(--warn);background:var(--warn-soft)}
+  .empty{color:var(--mute);font-size:14px;padding:6px 0}
+  .filters{display:flex;gap:4px;margin-bottom:10px;flex-wrap:wrap}
+  .filters button{background:none;border:1px solid var(--line);border-radius:12px;padding:3px 10px;font-size:13px;color:var(--mute)}
+  .filters button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .showdone{margin-top:8px;font-size:13px;color:var(--mute);background:none;border:0;padding:0;text-decoration:underline}
+
+  /* calendar */
+  .calnav{display:flex;align-items:center;gap:8px;margin-bottom:10px;font-size:14px}
+  .calnav button[data-cal]{background:none;border:1px solid var(--line);border-radius:var(--r);padding:4px 10px;color:var(--ink);line-height:1}
+  .calnav button[data-cal]:hover{background:var(--tint)}
+  .calnav .lbl{font-weight:600;min-width:130px;text-align:center}
+  .calnav .today{margin-left:auto;font-size:12px;color:var(--mute)}
+  .calgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+  .calgrid .wd{font-size:11px;color:var(--mute);text-align:center;padding:2px 0 6px}
+  .calcell{min-height:64px;border:1px solid var(--line);border-radius:var(--r);padding:4px;font-size:11px;cursor:pointer;display:flex;flex-direction:column;gap:2px;background:var(--card)}
+  .calcell:hover{border-color:var(--route)}
+  .calcell.empty{border-color:transparent;cursor:default;background:none}
+  .calcell.today{border-color:var(--route);box-shadow:inset 0 0 0 1px var(--route)}
+  .calcell.sel{background:var(--route-soft);border-color:var(--route)}
+  .calcell .dnum{font-size:11px;color:var(--mute);font-weight:600}
+  .calcell.today .dnum{color:var(--route)}
+  .calcell .chip{display:flex;align-items:center;gap:3px;overflow:hidden;color:var(--ink)}
+  .calcell .chip .dot{width:6px;height:6px;border-radius:50%;flex:none}
+  .calcell .chip span:last-child{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .calcell .more{color:var(--mute)}
+  @media (max-width:760px){.calcell{min-height:44px;font-size:10px}.calcell .chip span:last-child{display:none}}
+
+  /* staff */
+  .load{margin:6px 0 12px}
+  .load .lb{display:flex;justify-content:space-between;font-size:13px;color:var(--mute);margin-bottom:4px}
+  .load .b{height:10px;background:var(--tint);border-radius:5px;overflow:hidden}
+  .load .b i{display:block;height:100%;background:var(--route)}
+  .load .b i.over{background:var(--warn)}
+  .alloc{display:grid;grid-template-columns:1fr auto;gap:4px 12px;font-size:14px}
+  .alloc input{width:52px;border:0;border-bottom:1px dashed var(--line);text-align:right;background:none;outline:none}
+
+  /* time tracking */
+  .task .actions{display:flex;gap:2px}
+  .logt{background:none;border:0;color:var(--mute);font-size:14px;line-height:1;padding:2px 5px;opacity:0;border-radius:3px}
+  .task:hover .logt,.logt:focus{opacity:1}
+  .logt:hover{color:var(--route);background:var(--route-soft)}
+  .timeform{grid-column:2;display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:6px;padding-top:6px;border-top:1px dashed var(--line);font-size:13px}
+  .timeform input,.timeform select{border:1px solid var(--line);border-radius:var(--r);padding:5px 7px;background:#fff;font-size:13px}
+  .timeform input[type=number]{width:64px}
+  .timeform button{background:var(--route);color:#fff;border:0;border-radius:var(--r);padding:5px 10px;font-weight:600;font-size:13px}
+  .timeform button.cancel{background:none;color:var(--mute);border:1px solid var(--line);font-weight:400}
+  .addtime{display:flex;gap:6px;margin-bottom:4px;flex-wrap:wrap}
+  .addtime input,.addtime select{border:1px solid var(--line);border-radius:var(--r);padding:7px 8px;background:var(--paper);font-size:13px}
+  .addtime input[type=number]{width:70px}
+  .addtime input[type=text]{flex:1;min-width:140px}
+  .addtime button{background:var(--route);color:#fff;border:0;border-radius:var(--r);padding:8px 14px;font-weight:600}
+  .rangepick{display:flex;gap:8px;align-items:center;margin:8px 0;font-size:13px;color:var(--mute)}
+  .rangepick input[type=date]{border:1px solid var(--line);border-radius:var(--r);padding:5px 7px;background:#fff;font-size:13px;color:var(--ink)}
+  .hbar{position:relative;height:7px;background:var(--tint);border-radius:4px;overflow:hidden;display:flex;width:140px}
+  .hbar .seg{height:100%}
+  .hourstbl{width:100%;border-collapse:collapse;font-size:13px;margin-top:12px}
+  .hourstbl th,.hourstbl td{padding:8px 10px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
+  .hourstbl th:first-child,.hourstbl td:first-child{text-align:left;white-space:normal}
+  .hourstbl thead th{color:var(--mute);font-weight:600}
+  .hourstbl tbody td{color:var(--mute)}
+  .hourstbl tbody td:last-child{color:var(--ink)}
+  .hourstbl tfoot th{border-top:1px solid var(--line);border-bottom:0;font-weight:600}
+  .rowlabel{display:flex;flex-direction:column;gap:4px}
+  .entries{list-style:none;margin:0;padding:0}
+  .entry{display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding:7px 0;border-top:1px solid var(--line);font-size:13px}
+  .entry:first-child{border-top:0}
+  .entry input,.entry select{border:1px solid var(--line);border-radius:var(--r);padding:5px 7px;background:#fff;font-size:13px}
+  .entry input[type=date]{width:132px}
+  .entry input[type=number]{width:60px}
+  .entry input[type=text]{flex:1;min-width:120px}
+  .entry select{max-width:150px}
+  .entry .x{background:none;border:0;color:var(--mute);font-size:16px;line-height:1;padding:2px 4px;border-radius:3px;margin-left:auto}
+  .entry .x:hover{color:var(--warn);background:var(--warn-soft)}
+  .toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:8px 14px;border-radius:var(--r);font-size:13px;opacity:0;pointer-events:none;transition:opacity .2s}
+  .toast.show{opacity:1}
+  .danger{color:var(--warn)}
+  .btn-sm{font-size:12px;background:none;border:1px solid var(--line);border-radius:var(--r);padding:4px 8px;color:var(--mute)}
+  .btn-sm:hover{color:var(--ink)}
+  .kv{font-size:13px;color:var(--mute)}
+  .kv b{color:var(--ink);font-weight:600}
+  .clink{background:none;border:0;padding:0;font:inherit;font-weight:600;cursor:pointer}
+  .clink:hover{text-decoration:underline}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+  /* auth / identity */
+  #loadingScreen{display:flex;align-items:center;justify-content:center;height:100vh;color:var(--mute);font-size:14px}
+  .authwrap{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}
+  .authcard{width:100%;max-width:340px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:28px}
+  .authcard h1{font-size:16px;font-weight:600;margin:0 0 20px;display:flex;align-items:baseline;gap:6px}
+  .authcard h1 small{font-size:12px;color:var(--mute);font-weight:400}
+  .authcard form{display:flex;flex-direction:column;gap:8px}
+  .authcard input{border:1px solid var(--line);border-radius:var(--r);padding:9px 10px;font-size:14px;width:100%}
+  .authcard button[type=submit]{background:var(--route);color:#fff;border:0;border-radius:var(--r);padding:10px;font-weight:600;margin-top:4px}
+  .linklike{background:none;border:0;color:var(--mute);font-size:13px;text-decoration:underline;padding:0;margin-top:12px;display:block}
+  .autherr{background:var(--warn-soft);color:var(--warn);font-size:13px;padding:8px 10px;border-radius:var(--r);margin-bottom:12px}
+  .claimlede{font-size:14px;color:var(--mute);margin:0 0 14px}
+  .claimlist{display:flex;flex-direction:column;gap:6px}
+  .claimbtn{border:1px solid var(--line);border-radius:var(--r);padding:10px;background:none;text-align:left;font-size:14px}
+  .claimbtn:hover{background:var(--tint)}
+  .claimor{text-align:center;color:var(--mute);font-size:12px;margin:14px 0}
+  .whoami{font-size:12px;color:var(--mute);padding:0 4px 6px}
+</style>
+</head>
+<body>
+<div id="loadingScreen">Loading…</div>
+
+<div id="authScreen" class="authwrap" hidden>
+  <div class="authcard">
+    <h1>Tourstack<small>Operations</small></h1>
+    <div id="authError" class="autherr" hidden></div>
+    <form id="authForm">
+      <input type="email" name="email" placeholder="Email" required autocomplete="email">
+      <input type="password" name="password" placeholder="Password" required autocomplete="current-password" minlength="6">
+      <button type="submit" id="authSubmit">Sign in</button>
+    </form>
+    <button type="button" id="authToggle" class="linklike">Need an account? Sign up</button>
+  </div>
+</div>
+
+<div id="claimScreen" class="authwrap" hidden>
+  <div class="authcard">
+    <h1>Tourstack<small>Operations</small></h1>
+    <p class="claimlede">Which team member are you?</p>
+    <div id="claimList" class="claimlist"></div>
+    <div class="claimor">or</div>
+    <form id="claimNewForm">
+      <input type="text" name="name" placeholder="Your name" required autocomplete="off">
+      <button type="submit">I'm new — add me</button>
+    </form>
+  </div>
+</div>
+
+<div class="app" id="app" hidden>
+  <aside class="rail">
+    <h1>Tourstack<small>Operations</small></h1>
+    <nav class="nav" id="nav"></nav>
+    <div class="foot">
+      <span class="whoami" id="whoami"></span>
+      <button id="export">Export</button>
+      <button id="signout" class="danger">Sign out</button>
+    </div>
+  </aside>
+  <main class="main" id="main"></main>
+</div>
+<div class="toast" id="toast"></div>
+
+<script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script>
+/* ---------- data ---------- */
+const PEOPLE = () => ["Oli",...S.staff.map(x=>x.name),...(S.freelancers||[]).map(x=>x.name)];
+// contrast-checked (≥4.5:1 white-on-color) palette, cycled for new clients
+const CLIENT_PALETTE = ["#3D5A80","#2F6B4F","#4D774C","#556F58","#966832","#8C6A5D","#2E6E6B","#6B4C7A","#9C4A5C","#8A6A1E","#4A5A72","#4E4A8C","#A24A34","#3A6B4A"];
+
+
+function t(){return Math.random().toString(36).slice(2,9)}
+
+const SUPABASE_URL = "https://oorjrhiiejwcoinqireq.supabase.co";
+const SUPABASE_KEY = "sb_publishable_B0MtkyQ580H-mPcB5VaM3A_vNxSG6D2";
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let S = {
+  clients:[], tasks:[], timeEntries:[], staff:[], freelancers:[],
+  timeView:{mode:"week",start:"",end:""}, timeGroupBy:"who", loggingFor:null,
+  calMonth:"", calDay:null, cap:50, view:"cal", filter:"all", showDone:false
+};
+let ME = null; // this browser's `people` row, once identity is claimed
+const $ = s => document.querySelector(s);
+
+/* ---------- row <-> app-model mapping (DB columns differ slightly from the old local shape) ---------- */
+const mapTask = r => ({id:r.id, client:r.client_id, text:r.text, who:r.who, due:r.due||"", done:r.done, pri:r.pri, est:r.est});
+const mapEntry = r => ({id:r.id, client:r.client_id, taskId:r.task_id, who:r.who, date:r.date, hours:+r.hours, text:r.text||""});
+
+/* ---------- storage: Supabase, shared across the team ---------- */
+async function loadData(){
+  const [{data:clients,error:e1},{data:tasks,error:e2},{data:timeEntries,error:e3},{data:people,error:e4}] = await Promise.all([
+    sb.from("clients").select("*").order("created_at"),
+    sb.from("tasks").select("*").order("created_at"),
+    sb.from("time_entries").select("*").order("date",{ascending:false}),
+    sb.from("people").select("*").order("created_at"),
+  ]);
+  const err = e1||e2||e3||e4; if(err){ toast("Couldn't load — "+err.message); throw err; }
+  S.clients = clients||[];
+  S.tasks = (tasks||[]).map(mapTask);
+  S.timeEntries = (timeEntries||[]).map(mapEntry);
+  S.staff = (people||[]).filter(p=>p.kind==="staff");
+  S.freelancers = (people||[]).filter(p=>p.kind==="freelancer");
+  S.calMonth = today().slice(0,7);
+}
+// fire-and-forget persist for optimistic local edits — UI already updated, this just syncs
+function persist(promise){ promise.then(({error})=>{ if(error) toast("Sync error: "+error.message); }); }
+
+async function addTask(clientId,text,who,due){
+  const {data,error} = await sb.from("tasks").insert({client_id:clientId,text,who,due:due||null}).select().single();
+  if(error) return toast("Error: "+error.message);
+  S.tasks.unshift(mapTask(data)); render(); toast("Added");
+}
+async function deleteTask(id){
+  S.tasks=S.tasks.filter(z=>z.id!==id); render(); toast("Deleted");
+  persist(sb.from("tasks").delete().eq("id",id));
+}
+async function addTimeEntry(row){
+  const {data,error} = await sb.from("time_entries").insert(row).select().single();
+  if(error) return toast("Error: "+error.message);
+  S.timeEntries.push(mapEntry(data)); render(); toast("Logged");
+}
+async function deleteTimeEntry(id){
+  S.timeEntries=S.timeEntries.filter(z=>z.id!==id); render(); toast("Deleted");
+  persist(sb.from("time_entries").delete().eq("id",id));
+}
+async function addClientRow(name,hrs){
+  const color = CLIENT_PALETTE[S.clients.length % CLIENT_PALETTE.length];
+  const {data,error} = await sb.from("clients").insert({name,hrs,color,staff:"",contact:"",notes:""}).select().single();
+  if(error) return toast("Error: "+error.message);
+  S.clients.push(data); render(); renderNav(); toast("Added");
+}
+async function addPerson(row){
+  const {data,error} = await sb.from("people").insert(row).select().single();
+  if(error){ toast("Error: "+error.message); return null; }
+  return data;
+}
+async function removeFreelancer(f){
+  if(!confirm("Remove "+f.name+"? Their tasks will be reassigned to Oli.")) return;
+  S.tasks.forEach(x=>{if(x.who===f.name)x.who="Oli";});
+  S.freelancers=S.freelancers.filter(z=>z.id!==f.id); render();
+  persist(sb.from("tasks").update({who:"Oli"}).eq("who",f.name));
+  persist(sb.from("people").delete().eq("id",f.id));
+}
+
+/* ---------- realtime: keep every open tab in sync ---------- */
+function upsert(arr, mapped){ const i=arr.findIndex(z=>z.id===mapped.id); if(i>=0) arr[i]=mapped; else arr.push(mapped); }
+function subscribeRealtime(){
+  sb.channel("tourstack-db")
+    .on("postgres_changes",{event:"*",schema:"public",table:"clients"}, p=>{
+      if(p.eventType==="DELETE"){ S.clients=S.clients.filter(z=>z.id!==p.old.id); } else upsert(S.clients,p.new);
+      render(); renderNav(); })
+    .on("postgres_changes",{event:"*",schema:"public",table:"tasks"}, p=>{
+      if(p.eventType==="DELETE"){ S.tasks=S.tasks.filter(z=>z.id!==p.old.id); } else upsert(S.tasks,mapTask(p.new));
+      render(); })
+    .on("postgres_changes",{event:"*",schema:"public",table:"time_entries"}, p=>{
+      if(p.eventType==="DELETE"){ S.timeEntries=S.timeEntries.filter(z=>z.id!==p.old.id); } else upsert(S.timeEntries,mapEntry(p.new));
+      render(); })
+    .on("postgres_changes",{event:"*",schema:"public",table:"people"}, p=>{
+      if(p.eventType==="DELETE"){ S.staff=S.staff.filter(z=>z.id!==p.old.id); S.freelancers=S.freelancers.filter(z=>z.id!==p.old.id); }
+      else { S.staff=S.staff.filter(z=>z.id!==p.new.id); S.freelancers=S.freelancers.filter(z=>z.id!==p.new.id);
+        if(p.new.kind==="staff") S.staff.push(p.new); else if(p.new.kind==="freelancer") S.freelancers.push(p.new); }
+      render(); })
+    .subscribe();
+}
+function toast(m){ const el=$("#toast"); el.textContent=m; el.classList.add("show"); setTimeout(()=>el.classList.remove("show"),1800); }
+
+/* ---------- auth & identity ---------- */
+let authMode = "signin";
+async function initAuth(){
+  const {data:{session}} = await sb.auth.getSession();
+  if(!session){ $("#loadingScreen").hidden=true; $("#authScreen").hidden=false; return; }
+  await afterSignIn(session);
+}
+async function afterSignIn(session){
+  $("#loadingScreen").hidden=false; $("#authScreen").hidden=true; $("#claimScreen").hidden=true; $("#app").hidden=true;
+  const {data:mine} = await sb.from("people").select("*").eq("auth_user_id",session.user.id).maybeSingle();
+  if(mine){ ME=mine; await bootApp(); return; }
+  const {data:unclaimed} = await sb.from("people").select("*").is("auth_user_id",null);
+  renderClaimScreen(unclaimed||[], session.user.id);
+  $("#loadingScreen").hidden=true; $("#claimScreen").hidden=false;
+}
+function renderClaimScreen(unclaimed, uid){
+  const list=$("#claimList");
+  list.innerHTML = unclaimed.map(p=>`<button type="button" class="claimbtn" data-id="${p.id}">${esc(p.name)}</button>`).join("")
+    || `<p class="kv">No unclaimed profiles — add yourself below.</p>`;
+  list.querySelectorAll("button").forEach(b=>b.onclick=async()=>{
+    const {data,error} = await sb.from("people").update({auth_user_id:uid}).eq("id",b.dataset.id).select().single();
+    if(error) return toast("Error: "+error.message);
+    ME=data; await bootApp();
+  });
+}
+async function bootApp(){
+  $("#loadingScreen").hidden=false; $("#claimScreen").hidden=true; $("#authScreen").hidden=true; $("#app").hidden=true;
+  await loadData();
+  subscribeRealtime();
+  $("#loadingScreen").hidden=true; $("#app").hidden=false;
+  $("#whoami").textContent = ME.name;
+  renderNav(); render();
+}
+
+/* ---------- helpers ---------- */
+const client = id => S.clients.find(c=>c.id===id);
+const open = () => S.tasks.filter(x=>!x.done);
+const today = () => new Date().toISOString().slice(0,10);
+const fmtDue = d => { if(!d) return ""; const dt=new Date(d+"T00:00"); return dt.toLocaleDateString("en-GB",{day:"numeric",month:"short"}); };
+const esc = s => String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const startOfWeek = ds => { const d=new Date(ds+"T00:00"); const day=(d.getDay()+6)%7; d.setDate(d.getDate()-day); return d.toISOString().slice(0,10); };
+const endOfWeek = ds => { const d=new Date(startOfWeek(ds)+"T00:00"); d.setDate(d.getDate()+6); return d.toISOString().slice(0,10); };
+const startOfMonth = ds => ds.slice(0,8)+"01";
+const endOfMonth = ds => { const d=new Date(ds+"T00:00"); const nd=new Date(d.getFullYear(),d.getMonth()+1,0); return nd.toISOString().slice(0,10); };
+function timeRange(){ const v=S.timeView, t=today();
+  if(v.mode==="week") return [startOfWeek(t),endOfWeek(t)];
+  if(v.mode==="month") return [startOfMonth(t),endOfMonth(t)];
+  if(v.mode==="custom") return [v.start||"",v.end||""];
+  return [null,null];
+}
+const entriesInRange = () => { const [s,e]=timeRange(); return (S.timeEntries||[]).filter(x=>(!s||x.date>=s)&&(!e||x.date<=e)); };
+const fmtH = n => (Math.round((n||0)*100)/100).toString();
+const loggedFor = id => (S.timeEntries||[]).filter(x=>x.taskId===id).reduce((a,x)=>a+(+x.hours||0),0);
+
+/* ---------- render ---------- */
+function render(){ renderNav(); renderMain(); }
+
+function renderNav(){
+  const n = $("#nav"); n.innerHTML="";
+  const b=(label,view,cnt)=>{ const el=document.createElement("button"); el.className=S.view===view?"on":""; el.innerHTML=`<span>${esc(label)}</span>${cnt!=null?`<span class="cnt">${cnt}</span>`:""}`; el.onclick=()=>{S.view=view;render();}; n.appendChild(el); };
+  b("Calendar","cal",open().length);
+  b("Staff","staff",open().filter(x=>S.staff.some(st=>st.name===x.who)).length);
+  b("Freelancers","free",open().filter(x=>(S.freelancers||[]).some(f=>f.name===x.who)).length);
+  b("Hours","hours");
+  const g=document.createElement("button"); g.className="grp"+(S.view==="clients"?" on":""); g.textContent="Clients"; g.onclick=()=>{S.view="clients";render();}; n.appendChild(g);
+  S.clients.forEach(c=>b(c.name,"c:"+c.id,open().filter(x=>x.client===c.id).length));
+}
+
+function track(){
+  const total = S.clients.reduce((a,c)=>a+(+c.hrs||0),0);
+  const cap = S.cap; const span = Math.max(total,cap);
+  const segs = S.clients.filter(c=>c.hrs>0).map(c=>{ const w=(c.hrs/span)*100; return `<div class="seg ${w<7?"thin":""}" style="width:${w}%;background:${c.color}" title="${esc(c.name)} — ${c.hrs}h">${w>=7?esc(c.name.split(" ")[0])+" "+c.hrs:""}</div>`; }).join("");
+  const capPos = (cap/span)*100;
+  const over = total>cap;
+  return `<div class="track"><div class="bar">${segs}<div class="cap" style="left:calc(${capPos}% - 1px)"></div></div>
+    <div class="legend"><span>${total} h planned</span><span class="${over?"over":""}">${over?`${total-cap} h over the ${cap} h cap`:`${cap-total} h free under the ${cap} h cap`}</span></div></div>`;
+}
+
+/* ---------- calendar ---------- */
+const monthLabel = ym => { const [y,m] = ym.split("-").map(Number); return new Date(y,m-1,1).toLocaleDateString("en-GB",{month:"long",year:"numeric"}); };
+const shiftMonth = (ym,n) => { const [y,m] = ym.split("-").map(Number); const d = new Date(y,m-1+n,1); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`; };
+
+function calNav(){
+  return `<div class="calnav">
+    <button type="button" data-cal="prev" aria-label="Previous month">‹</button>
+    <span class="lbl">${monthLabel(S.calMonth)}</span>
+    <button type="button" data-cal="next" aria-label="Next month">›</button>
+    <button type="button" class="today" data-cal="today">Today</button>
+  </div>`;
+}
+
+function calGrid(){
+  const [y,m] = S.calMonth.split("-").map(Number);
+  const first = new Date(y,m-1,1);
+  const startOffset = (first.getDay()+6)%7; // Monday-start week
+  const daysInM = new Date(y,m,0).getDate();
+  const cells = [];
+  for(let i=0;i<startOffset;i++) cells.push(null);
+  for(let d=1; d<=daysInM; d++) cells.push(`${y}-${String(m).padStart(2,"0")}-${String(d).padStart(2,"0")}`);
+  while(cells.length%7!==0) cells.push(null);
+  const wd = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].map(w=>`<div class="wd">${w}</div>`).join("");
+  const td = today();
+  const cellHtml = cells.map(ds=>{
+    if(!ds) return `<div class="calcell empty"></div>`;
+    const dayTasks = S.tasks.filter(x=>x.due===ds && !x.done);
+    const dnum = +ds.slice(8,10);
+    const isToday = ds===td, isSel = ds===S.calDay;
+    const chips = dayTasks.slice(0,3).map(x=>{ const c = client(x.client); return `<div class="chip" title="${esc(x.text)}"><span class="dot" style="background:${c?c.color:"var(--mute)"}"></span><span>${esc(x.text)}</span></div>`; }).join("");
+    const more = dayTasks.length>3? `<div class="more">+${dayTasks.length-3} more</div>` : "";
+    return `<div class="calcell ${isToday?"today":""} ${isSel?"sel":""}" data-day="${ds}">
+      <div class="dnum">${dnum}</div>${chips}${more}</div>`;
+  }).join("");
+  return `<div class="calgrid">${wd}${cellHtml}</div>`;
+}
+
+function taskList(list, opts={}){
+  const f = S.filter;
+  let items = list.filter(x=> f==="all" || x.who===f);
+  const needsLog = x => x.done && !loggedFor(x.id);
+  // a done task with no hours logged stays in the visible list (flagged) instead of
+  // dropping into the collapsed "done" bucket, so the reminder isn't hidden from view
+  const done = items.filter(x=>x.done && !needsLog(x)), live = items.filter(x=>!x.done || needsLog(x));
+  live.sort((a,b)=>(needsLog(b)-needsLog(a))||(b.pri-a.pri)||((a.due||"9")>(b.due||"9")?1:-1));
+  const row = x => { const logged = loggedFor(x.id); return `<li class="task ${x.done?"done":""}" data-id="${x.id}">
+    <input type="checkbox" ${x.done?"checked":""} aria-label="Done">
+    <div class="t"><div class="txt" contenteditable="true" spellcheck="false">${esc(x.text)}</div>
+      <div class="meta">${opts.showClient?`<span class="cl">${esc(client(x.client)?.name||"")}</span>`:""}<span class="who">${esc(x.who)}</span>${x.due?`<span class="due ${(!x.done&&x.due<today())?"late":""}">${fmtDue(x.due)}</span>`:""}${x.pri?`<span>priority</span>`:""}<span class="est" title="Estimated hours"><input type="number" class="estinput" step="0.25" min="0" value="${x.est||""}" placeholder="–"> h est</span>${logged?`<span class="logged ${x.est&&logged>x.est?"over":""}">${fmtH(logged)}h logged</span>`:""}${needsLog(x)?`<button type="button" class="nolog" data-nolog="${x.id}" title="Marked done with no hours logged yet">⏰ Log hours</button>`:""}</div>
+      ${S.loggingFor===x.id?`<form class="timeform" data-tid="${x.id}">
+        <input type="date" name="date" value="${today()}">
+        <select name="who">${PEOPLE().map(p=>`<option ${p===x.who?"selected":""}>${esc(p)}</option>`).join("")}</select>
+        <input type="number" name="hours" step="0.25" min="0" placeholder="Hours" required autofocus>
+        <button type="submit">Log</button><button type="button" class="cancel">Cancel</button></form>`:""}</div>
+    <div class="actions"><button class="logt" data-log="${x.id}" aria-label="Log time" title="Log time">⏰</button><button class="x" aria-label="Delete">×</button></div></li>`; };
+  let html = live.length? `<ul class="tasks">${live.map(row).join("")}</ul>` : `<div class="empty">Nothing open. Add one below or enjoy it.</div>`;
+  if(done.length) html += `<button class="showdone">${S.showDone?"Hide":"Show"} ${done.length} done</button>` + (S.showDone?`<ul class="tasks">${done.map(row).join("")}</ul>`:"");
+  return html;
+}
+const filters = () => `<div class="filters">${["all",...PEOPLE()].map(p=>`<button class="${S.filter===p?"on":""}" data-f="${p}">${p==="all"?"Everyone":p}</button>`).join("")}</div>`;
+const addForm = (cid, defDue) => `<form class="add" data-client="${cid||""}">
+  <input type="text" name="text" placeholder="Add a task" required autocomplete="off">
+  ${cid?"":`<select name="client">${S.clients.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join("")}</select>`}
+  <select name="who">${PEOPLE().map(p=>`<option>${p}</option>`).join("")}</select>
+  <label class="fld">Due<input type="date" name="due" value="${esc(defDue||"")}" title="Deadline for this task (optional) — not the start date"></label>
+  <input type="number" name="est" step="0.25" min="0" placeholder="Est. hrs">
+  <button type="submit">Add</button></form>`;
+
+function periodSelector(){
+  const v = S.timeView;
+  const modes = [["week","This week"],["month","This month"],["custom","Custom range"],["all","All time"]];
+  const btns = modes.map(([m,label])=>`<button class="${v.mode===m?"on":""}" data-mode="${m}">${label}</button>`).join("");
+  const custom = v.mode==="custom" ? `<div class="rangepick"><input type="date" name="start" value="${esc(v.start||"")}"><span>to</span><input type="date" name="end" value="${esc(v.end||"")}"></div>` : "";
+  return `<div class="filters" id="periodf">${btns}</div>${custom}`;
+}
+const groupSelector = () => `<div class="filters" id="groupf">
+  <button class="${S.timeGroupBy==="who"?"on":""}" data-g="who">By assignee</button>
+  <button class="${S.timeGroupBy==="client"?"on":""}" data-g="client">By client</button></div>`;
+const addTimeForm = () => `<form class="addtime" id="addtime">
+  <input type="date" name="date" value="${today()}" required>
+  <select name="client">${S.clients.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join("")}</select>
+  <select name="who">${PEOPLE().map(p=>`<option>${esc(p)}</option>`).join("")}</select>
+  <input type="number" name="hours" step="0.25" min="0" placeholder="Hours" required>
+  <input type="text" name="text" placeholder="What was it for?" autocomplete="off">
+  <button type="submit">Log time</button></form>`;
+
+function hoursTable(){
+  const entries = entriesInRange(), people = PEOPLE(), clients = S.clients, byClient = S.timeGroupBy==="client";
+  const matrix = {}; people.forEach(p=>matrix[p]={});
+  entries.forEach(e=>{ if(!matrix[e.who]) matrix[e.who]={}; matrix[e.who][e.client]=(matrix[e.who][e.client]||0)+(+e.hours||0); });
+  const rowTotal = p => clients.reduce((a,c)=>a+(matrix[p]?.[c.id]||0),0);
+  const colTotal = cid => people.reduce((a,p)=>a+(matrix[p]?.[cid]||0),0);
+  const grand = people.reduce((a,p)=>a+rowTotal(p),0);
+  const outer = byClient? clients : people;
+  const inner = byClient? people : clients;
+  const maxRow = Math.max(1, ...outer.map(o=> byClient? colTotal(o.id) : rowTotal(o)));
+
+  const thead = `<tr><th></th>${inner.map(i=>`<th>${esc(byClient?i:i.name)}</th>`).join("")}<th>Total</th></tr>`;
+  const bodyRows = outer.map(o=>{
+    const total = byClient? colTotal(o.id) : rowTotal(o);
+    const cells = inner.map(i=>{ const h = byClient? (matrix[i]?.[o.id]||0) : (matrix[o]?.[i.id]||0); return `<td>${h?fmtH(h):"–"}</td>`; }).join("");
+    const w = maxRow? (total/maxRow*100) : 0;
+    let bar;
+    if(byClient){ bar = `<div class="hbar"><div class="seg" style="width:${w}%;background:${o.color}"></div></div>`; }
+    else { const segs = clients.filter(c=>(matrix[o]?.[c.id]||0)>0).map(c=>{ const sw = total? ((matrix[o][c.id]/total)*w):0; return `<div class="seg" style="width:${sw}%;background:${c.color}" title="${esc(c.name)} — ${fmtH(matrix[o][c.id])}h"></div>`; }).join(""); bar = `<div class="hbar">${segs}</div>`; }
+    const label = byClient? o.name : o;
+    return `<tr><td><div class="rowlabel"><span>${esc(label)}</span>${bar}</div></td>${cells}<td><b>${fmtH(total)}</b></td></tr>`;
+  }).join("");
+  const foot = inner.map(i=>{ const t = byClient? rowTotal(i) : colTotal(i.id); return `<th>${fmtH(t)}</th>`; }).join("");
+  const empty = !entries.length ? `<div class="empty">No time logged for this period yet.</div>` : "";
+  return `${empty}<table class="hourstbl"><thead>${thead}</thead><tbody>${bodyRows}</tbody><tfoot><tr><th>Total</th>${foot}<th>${fmtH(grand)}</th></tr></tfoot></table>`;
+}
+
+function entriesList(){
+  const entries = entriesInRange().slice().sort((a,b)=> b.date.localeCompare(a.date));
+  if(!entries.length) return `<div class="empty">No time logged for this period yet.</div>`;
+  const rows = entries.map(e=>`<li class="entry" data-id="${e.id}">
+    <input type="date" name="date" value="${e.date}">
+    <select name="client">${S.clients.map(c=>`<option value="${c.id}" ${c.id===e.client?"selected":""}>${esc(c.name)}</option>`).join("")}</select>
+    <select name="who">${PEOPLE().map(p=>`<option ${p===e.who?"selected":""}>${esc(p)}</option>`).join("")}</select>
+    <input type="number" name="hours" step="0.25" min="0" value="${e.hours}">
+    <input type="text" name="text" value="${esc(e.text||"")}" placeholder="What was it for?">
+    <button type="button" class="x" aria-label="Delete entry">×</button></li>`).join("");
+  return `<ul class="entries">${rows}</ul>`;
+}
+
+/* ---------- client-facing share ---------- */
+// Builds a standalone, read-only HTML snapshot for one client — task text,
+// status, and due date only. No "who", no estimated/logged hours, no
+// internal notes fields, no dependency on this app once downloaded.
+function shareClientView(cid){
+  const c = client(cid); if(!c) return;
+  const fmtLong = d => { if(!d) return ""; const dt=new Date(d+"T00:00"); return dt.toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"}); };
+  const parsed = S.tasks.filter(x=>x.client===cid).map(x=>{
+    let text = x.text, tag = "";
+    const tm = text.match(/^\[([^\]]+)\]\s*/); if(tm){ tag = tm[1]; text = text.slice(tm[0].length); }
+    let status;
+    if(x.done) status = "Done";
+    else if(/\(in progress\)\s*$/i.test(text)){ status = "In progress"; text = text.replace(/\s*\(in progress\)\s*$/i,""); }
+    else status = "Not started";
+    return {tag, text, status, due:x.due};
+  });
+  const groups = {}, order = [];
+  parsed.forEach(p=>{ if(!(p.tag in groups)){groups[p.tag]=[]; order.push(p.tag);} groups[p.tag].push(p); });
+  const total = parsed.length, done = parsed.filter(p=>p.status==="Done").length;
+  const pct = total? Math.round(done/total*100) : 0;
+  const pill = s => `<span class="stpill ${s==="Done"?"done":s==="In progress"?"prog":"todo"}">${s}</span>`;
+  const sections = order.map(tag=>{
+    const rows = groups[tag].map(p=>`<li class="srow"><span class="stxt">${esc(p.text)}</span><span class="sright">${p.due?`<span class="sdue">${fmtLong(p.due)}</span>`:""}${pill(p.status)}</span></li>`).join("");
+    return `<div class="sgroup">${tag?`<h3>${esc(tag)}</h3>`:""}<ul class="slist">${rows}</ul></div>`;
+  }).join("");
+  const html = `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${esc(c.name)} — Progress</title><style>
+    :root{--paper:#F3F4F0;--card:#FFFFFF;--ink:#1B2620;--mute:#606963;--line:#D9DDD6;--route:${c.color};--route-soft:#DDE9E2;--tint:#EEF1EC;--r:6px}
+    *{box-sizing:border-box}
+    html,body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.5 "Avenir Next","Segoe UI",system-ui,-apple-system,sans-serif}
+    .wrap{max-width:640px;margin:0 auto;padding:44px 24px 60px}
+    h1{font-size:24px;font-weight:600;margin:0 0 4px;letter-spacing:-.02em}
+    .meta{color:var(--mute);font-size:14px;margin-bottom:28px}
+    .prog{margin-bottom:32px}
+    .prog .bar{height:10px;background:var(--tint);border-radius:6px;overflow:hidden}
+    .prog .fill{height:100%;background:var(--route)}
+    .prog .lbl{display:flex;justify-content:space-between;font-size:13px;color:var(--mute);margin-top:6px}
+    .sgroup{margin-bottom:22px}
+    .sgroup h3{font-size:13px;color:var(--mute);font-weight:600;margin:0 0 8px}
+    .slist{list-style:none;margin:0;padding:0;background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+    .srow{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 14px;border-top:1px solid var(--line)}
+    .srow:first-child{border-top:0}
+    .stxt{font-size:14px}
+    .sright{display:flex;align-items:center;gap:8px;flex-shrink:0}
+    .sdue{font-size:12px;color:var(--mute)}
+    .stpill{font-size:12px;font-weight:600;padding:2px 9px;border-radius:10px;white-space:nowrap}
+    .stpill.done{background:var(--route-soft);color:var(--route)}
+    .stpill.prog{background:#FBEFD9;color:#8A6A1E}
+    .stpill.todo{background:var(--tint);color:var(--mute)}
+    footer{margin-top:30px;font-size:12px;color:var(--mute)}
+    @media print{body{background:#fff}.wrap{padding:0}}
+  </style></head><body><div class="wrap">
+    <h1>${esc(c.name)}</h1>
+    <div class="meta">Progress overview — updated ${fmtLong(today())}</div>
+    <div class="prog"><div class="bar"><div class="fill" style="width:${pct}%"></div></div><div class="lbl"><span>${done} of ${total} complete</span><span>${pct}%</span></div></div>
+    ${sections || `<div class="meta">No tasks yet.</div>`}
+  </div></body></html>`;
+  const a = document.createElement("a");
+  a.href = "data:text/html;charset=utf-8,"+encodeURIComponent(html);
+  a.download = c.name.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"")+"-progress.html";
+  a.click();
+  toast("Downloaded — ready to share");
+}
+
+function renderMain(){
+  const m = $("#main"); const v = S.view;
+  if(v==="cal"){
+    const late = open().filter(x=>x.due && x.due<today()).length;
+    const unlogged = S.tasks.filter(x=>x.done && !loggedFor(x.id)).length;
+    const dayList = S.calDay ? S.tasks.filter(x=>x.due===S.calDay) : S.tasks.filter(x=>x.due);
+    const undated = S.tasks.filter(x=>!x.due);
+    m.innerHTML = `<div class="head"><h2>Calendar</h2><span class="sub">${open().length} open${late?` · <span class="danger">${late} overdue</span>`:""}${unlogged?` · <span class="danger">${unlogged} need hours logged</span>`:""}</span></div>
+      <div class="grid">
+        <div class="panel"><h3>${monthLabel(S.calMonth)}</h3>${calNav()}${calGrid()}</div>
+        <div class="panel"><h3>${S.calDay?`Due ${fmtDue(S.calDay)}`:"Dated tasks"}${S.calDay?` <button type="button" class="btn-sm" data-cal="clear">Show all</button>`:""}</h3>${filters()}${addForm(undefined,S.calDay||"")}${taskList(dayList,{showClient:true})}</div>
+      </div>
+      <div class="panel" style="margin-top:16px"><h3>No date<span>${undated.filter(x=>!x.done).length}</span></h3>${taskList(undated,{showClient:true})}</div>`;
+  } else if(v==="staff"){
+    m.innerHTML = `<div class="head"><h2>Staff</h2><span class="sub">who is doing what</span></div>
+      <div class="grid">${S.staff.map(s=>{         return `<div class="panel" data-staff="${s.id}"><h3>${esc(s.name)}</h3>
+        <h3>Open tasks<span>${open().filter(x=>x.who===s.name).length}</span></h3>
+        ${taskList(S.tasks.filter(x=>x.who===s.name),{showClient:true})}</div>`;}).join("")}</div>`;
+  } else if(v==="free"){
+    const fl=S.freelancers;
+    m.innerHTML = `<div class="head"><h2>Freelancers</h2><span class="sub">${fl.length} on the books</span></div>
+      <form class="add" id="addfree"><input type="text" name="name" placeholder="Name" required autocomplete="off"><input type="text" name="role" placeholder="What they do" autocomplete="off"><input type="text" name="rate" placeholder="Rate" autocomplete="off"><button type="submit">Add freelancer</button></form>
+      ${fl.length?`<div class="grid">${fl.map(f=>`<div class="panel" data-free="${f.id}"><h3>${esc(f.name)}<span>${esc([f.role,f.rate].filter(Boolean).join(" · "))}</span></h3>
+        <dl class="facts"><dt>Contact</dt><dd><input data-f="contact" value="${esc(f.contact||"")}" placeholder="Email or phone"></dd><dt>Notes</dt><dd><textarea data-f="notes" placeholder="Anything worth remembering">${esc(f.notes||"")}</textarea></dd></dl>
+        <h3 style="margin-top:14px">Open tasks<span>${open().filter(x=>x.who===f.name).length}</span></h3>
+        ${taskList(S.tasks.filter(x=>x.who===f.name),{showClient:true})}
+        <div style="margin-top:10px"><button class="btn-sm rmfree">Remove ${esc(f.name)}</button></div></div>`).join("")}</div>`:`<div class="empty">No freelancers yet. Add one above and they'll appear in every task owner list.</div>`}`;
+  } else if(v==="clients"){
+    m.innerHTML = `<div class="head"><h2>Clients</h2><span class="sub">${S.clients.length} on the books</span></div>
+      ${track()}
+      <form class="add" id="addclient">
+        <input type="text" name="name" placeholder="Client name" required autocomplete="off">
+        <input type="number" name="hrs" placeholder="Hours/wk" min="0" step="0.5" style="width:96px">
+        <button type="submit">Add client</button>
+      </form>
+      <div class="grid">${S.clients.map(c=>`<div class="panel" data-clientcard="${c.id}">
+        <h3><button type="button" class="clink" data-goto="c:${c.id}" style="color:${c.color}">${esc(c.name)}</button><span>${fmtH(c.hrs||0)}h/wk</span></h3>
+        ${c.staff?`<div class="kv">${esc(c.staff)}</div>`:""}
+        <div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap"><button type="button" class="btn-sm" data-goto="c:${c.id}">Open ${esc(c.name)} →</button><button type="button" class="btn-sm" data-share="${c.id}">Share client view ↗</button></div>
+      </div>`).join("")}</div>`;
+  } else if(v==="hours"){
+    m.innerHTML = `<div class="head"><h2>Hours</h2><span class="sub">${fmtH(entriesInRange().reduce((a,e)=>a+(+e.hours||0),0))} h logged this period</span></div>
+      <div class="panel"><h3>Log time</h3>${addTimeForm()}</div>
+      <div class="panel"><h3>Breakdown</h3>${periodSelector()}${groupSelector()}${hoursTable()}</div>
+      <div class="panel"><h3>Entries<span>${entriesInRange().length}</span></h3>${entriesList()}</div>`;
+  } else {
+    const c = client(v.slice(2)); if(!c){S.view="cal";return renderMain();}
+    m.innerHTML = `<div class="head"><h2>${esc(c.name)}</h2><span class="sub">${open().filter(x=>x.client===c.id).length} open</span></div>
+      <div class="grid">
+        <div class="panel"><h3>Client</h3><dl class="facts" data-client="${c.id}">
+          <dt>Weekly hours</dt><dd><input type="number" data-f="hrs" min="0" step="0.5" value="${c.hrs||0}"></dd>
+          <dt>Staff support</dt><dd><input data-f="staff" value="${esc(c.staff)}"></dd>
+          <dt>Contact</dt><dd><input data-f="contact" value="${esc(c.contact)}" placeholder="Name, email"></dd>
+          <dt>Notes</dt><dd><textarea data-f="notes" placeholder="Anything worth remembering">${esc(c.notes)}</textarea></dd>
+        </dl>
+        <div style="margin-top:12px"><button type="button" class="btn-sm" data-share="${c.id}">Share client view ↗</button></div>
+        </div>
+        <div class="panel"><h3>Tasks</h3>${filters()}${addForm(c.id)}${taskList(S.tasks.filter(x=>x.client===c.id))}</div>
+      </div>`;
+  }
+  bind();
+}
+
+/* ---------- events ---------- */
+function bind(){
+  const m = $("#main");
+  m.querySelectorAll("form.add").forEach(f=>f.onsubmit=e=>{ e.preventDefault(); const d=new FormData(f);
+    addTask(f.dataset.client||d.get("client"), d.get("text").trim(), d.get("who"), d.get("due")).then(()=>{
+      const est=+d.get("est")||0; if(est){ const x=S.tasks[0]; if(x){ x.est=est; persist(sb.from("tasks").update({est}).eq("id",x.id)); render(); } }
+    }); });
+  m.querySelectorAll(".task").forEach(li=>{ const x=S.tasks.find(z=>z.id===li.dataset.id); if(!x) return;
+    li.querySelector("input[type=checkbox]").onchange=e=>{x.done=e.target.checked;render();persist(sb.from("tasks").update({done:x.done}).eq("id",x.id));};
+    const estInp=li.querySelector(".estinput"); if(estInp) estInp.onchange=()=>{x.est=+estInp.value||0;render();persist(sb.from("tasks").update({est:x.est}).eq("id",x.id));};
+    const txt=li.querySelector(".txt"); txt.onblur=()=>{const v=txt.textContent.trim(); if(v&&v!==x.text){x.text=v;persist(sb.from("tasks").update({text:v}).eq("id",x.id));}}; txt.onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();txt.blur();}};
+    txt.ondblclick=()=>{x.pri=!x.pri;render();persist(sb.from("tasks").update({pri:x.pri}).eq("id",x.id));};
+    li.querySelector(".logt").onclick=()=>{S.loggingFor = S.loggingFor===x.id? null : x.id; render();};
+    const nolog=li.querySelector(".nolog"); if(nolog) nolog.onclick=()=>{S.loggingFor = S.loggingFor===x.id? null : x.id; render();};
+    li.querySelector(".x").onclick=()=>deleteTask(x.id);
+    const tf=li.querySelector(".timeform"); if(tf){
+      tf.onsubmit=e=>{ e.preventDefault(); const d=new FormData(tf); const hrs=+d.get("hours"); if(!hrs) return;
+        S.loggingFor=null;
+        addTimeEntry({date:d.get("date")||today(),client_id:x.client,who:d.get("who"),task_id:x.id,text:x.text,hours:hrs}); };
+      tf.querySelector(".cancel").onclick=()=>{S.loggingFor=null;render();};
+    } });
+  const at = m.querySelector("#addtime"); if(at) at.onsubmit=e=>{ e.preventDefault(); const d=new FormData(at); const hrs=+d.get("hours"); if(!hrs) return;
+    addTimeEntry({date:d.get("date")||today(),client_id:d.get("client"),who:d.get("who"),task_id:null,text:(d.get("text")||"").trim(),hours:hrs}); };
+  m.querySelectorAll("[data-cal]").forEach(b=>b.onclick=()=>{ const act=b.dataset.cal;
+    if(act==="prev") S.calMonth=shiftMonth(S.calMonth,-1);
+    else if(act==="next") S.calMonth=shiftMonth(S.calMonth,1);
+    else if(act==="today"){ S.calMonth=today().slice(0,7); S.calDay=today(); }
+    else if(act==="clear") S.calDay=null;
+    render(); });
+  m.querySelectorAll(".calcell[data-day]").forEach(cell=>cell.onclick=()=>{ const d=cell.dataset.day; S.calDay = S.calDay===d? null : d; render(); });
+  const pf = m.querySelector("#periodf"); if(pf) pf.querySelectorAll("button").forEach(b=>b.onclick=()=>{S.timeView.mode=b.dataset.mode;render();});
+  m.querySelectorAll('.rangepick input[name=start]').forEach(i=>i.onchange=()=>{S.timeView.start=i.value;render();});
+  m.querySelectorAll('.rangepick input[name=end]').forEach(i=>i.onchange=()=>{S.timeView.end=i.value;render();});
+  const gf = m.querySelector("#groupf"); if(gf) gf.querySelectorAll("button").forEach(b=>b.onclick=()=>{S.timeGroupBy=b.dataset.g;render();});
+  m.querySelectorAll(".entry").forEach(li=>{ const e=S.timeEntries.find(z=>z.id===li.dataset.id); if(!e) return;
+    li.querySelector("[name=date]").onchange=ev=>{e.date=ev.target.value||e.date;render();persist(sb.from("time_entries").update({date:e.date}).eq("id",e.id));};
+    li.querySelector("[name=client]").onchange=ev=>{e.client=ev.target.value;render();persist(sb.from("time_entries").update({client_id:e.client}).eq("id",e.id));};
+    li.querySelector("[name=who]").onchange=ev=>{e.who=ev.target.value;render();persist(sb.from("time_entries").update({who:e.who}).eq("id",e.id));};
+    li.querySelector("[name=hours]").onchange=ev=>{const h=+ev.target.value; if(h>0){e.hours=h;render();persist(sb.from("time_entries").update({hours:h}).eq("id",e.id));} else {ev.target.value=e.hours;} };
+    li.querySelector("[name=text]").onchange=ev=>{e.text=ev.target.value.trim();persist(sb.from("time_entries").update({text:e.text}).eq("id",e.id));};
+    li.querySelector(".x").onclick=()=>{ if(confirm("Delete this time entry?")) deleteTimeEntry(e.id); };
+  });
+  m.querySelectorAll(".filters button").forEach(b=>{ if(b.closest("#periodf")||b.closest("#groupf")) return; // those have their own handlers above — don't clobber them
+    b.onclick=()=>{S.filter=b.dataset.f;render();}; });
+  m.querySelectorAll(".showdone").forEach(b=>b.onclick=()=>{S.showDone=!S.showDone;render();});
+  const af=m.querySelector("#addfree"); if(af) af.onsubmit=e=>{e.preventDefault();const d=new FormData(af);
+    addPerson({name:d.get("name").trim(),kind:"freelancer",role:d.get("role").trim(),rate:d.get("rate").trim(),contact:"",notes:""}).then(p=>{ if(p){ S.freelancers.push(p); render(); toast("Added"); } }); };
+  const ac=m.querySelector("#addclient"); if(ac) ac.onsubmit=e=>{e.preventDefault(); const d=new FormData(ac);
+    addClientRow(d.get("name").trim(), +d.get("hrs")||0); };
+  m.querySelectorAll("[data-goto]").forEach(b=>b.onclick=()=>{S.view=b.dataset.goto;render();});
+  m.querySelectorAll("[data-share]").forEach(b=>b.onclick=()=>shareClientView(b.dataset.share));
+  m.querySelectorAll("[data-free]").forEach(p=>{const f=S.freelancers.find(z=>z.id===p.dataset.free);
+    p.querySelectorAll("[data-f]").forEach(i=>i.onchange=()=>{f[i.dataset.f]=i.value;persist(sb.from("people").update({[i.dataset.f]:i.value}).eq("id",f.id));});
+    p.querySelector(".rmfree").onclick=()=>removeFreelancer(f);});
+  m.querySelectorAll(".facts").forEach(dl=>{ const c=client(dl.dataset.client); if(!c) return; dl.querySelectorAll("[data-f]").forEach(i=>i.onchange=()=>{ const v=i.type==="number"?+i.value:i.value; c[i.dataset.f]=v; persist(sb.from("clients").update({[i.dataset.f]:v}).eq("id",c.id)); if(i.dataset.f==="hrs") renderNav(); }); });
+}
+
+$("#export").onclick=()=>{ const a=document.createElement("a"); a.href="data:application/json,"+encodeURIComponent(JSON.stringify(S,null,2)); a.download="tourstack-ops-"+today()+".json"; a.click(); };
+$("#signout").onclick=async()=>{ await sb.auth.signOut(); location.reload(); };
+
+$("#authToggle").onclick=()=>{ authMode = authMode==="signin"?"signup":"signin";
+  $("#authSubmit").textContent = authMode==="signin"?"Sign in":"Create account";
+  $("#authToggle").textContent = authMode==="signin"?"Need an account? Sign up":"Have an account? Sign in";
+  $("#authError").hidden=true; };
+$("#authForm").onsubmit=async e=>{ e.preventDefault(); const d=new FormData(e.target);
+  const email=d.get("email").trim(), password=d.get("password");
+  $("#authError").hidden=true;
+  const {data,error} = authMode==="signin"
+    ? await sb.auth.signInWithPassword({email,password})
+    : await sb.auth.signUp({email,password});
+  if(error){ $("#authError").textContent=error.message; $("#authError").hidden=false; return; }
+  if(authMode==="signup" && !data.session){ $("#authError").textContent="Check your email to confirm your account, then sign in."; $("#authError").hidden=false; authMode="signin"; $("#authSubmit").textContent="Sign in"; return; }
+  await afterSignIn(data.session);
+};
+$("#claimNewForm").onsubmit=async e=>{ e.preventDefault(); const d=new FormData(e.target); const name=d.get("name").trim(); if(!name) return;
+  const {data:{session}} = await sb.auth.getSession();
+  const {data,error} = await sb.from("people").insert({name,kind:"staff",auth_user_id:session.user.id}).select().single();
+  if(error) return toast("Error: "+error.message);
+  ME=data; await bootApp();
+};
+
+initAuth();
+</script>
+</body>
+</html>
