@@ -175,6 +175,29 @@
   .dashhead.st-caught_up::before{background:var(--ok)}
   .dashhead span{color:var(--mute);font-weight:400}
 
+  /* public client share page (unauthenticated, read-only) */
+  .shareview{background:var(--paper);min-height:100vh}
+  .shareview .wrap{max-width:640px;margin:0 auto;padding:44px 24px 60px}
+  .shareview h1{font-size:24px;font-weight:600;margin:0 0 4px;letter-spacing:-.02em}
+  .shareview .smeta{color:var(--mute);font-size:14px;margin-bottom:28px}
+  .shareview .prog{margin-bottom:32px}
+  .shareview .prog .bar{height:10px;background:var(--tint);border-radius:6px;overflow:hidden}
+  .shareview .prog .fill{height:100%}
+  .shareview .prog .lbl{display:flex;justify-content:space-between;font-size:13px;color:var(--mute);margin-top:6px}
+  .sgroup{margin-bottom:22px}
+  .sgroup h3{font-size:13px;color:var(--mute);font-weight:600;margin:0 0 8px}
+  .slist{list-style:none;margin:0;padding:0;background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+  .srow{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 14px;border-top:1px solid var(--line)}
+  .srow:first-child{border-top:0}
+  .srow .stxt{font-size:14px}
+  .sright{display:flex;align-items:center;gap:8px;flex-shrink:0}
+  .sdue{font-size:12px;color:var(--mute)}
+  .stpill{font-size:12px;font-weight:600;padding:2px 9px;border-radius:10px;white-space:nowrap}
+  .stpill.done{background:var(--tint);color:var(--sharecolor,var(--route))}
+  .stpill.prog{background:#FBEFD9;color:#8A6A1E}
+  .stpill.todo{background:var(--tint);color:var(--mute)}
+  .shareview footer{margin-top:30px;font-size:12px;color:var(--mute)}
+
   /* calendar */
   .calnav{display:flex;align-items:center;gap:8px;margin-bottom:10px;font-size:14px}
   .calnav button[data-cal]{background:none;border:1px solid var(--line);border-radius:var(--r);padding:4px 10px;color:var(--ink);line-height:1}
@@ -339,6 +362,7 @@
 </head>
 <body>
 <div id="loadingScreen">Loading…</div>
+<div id="shareScreen" class="shareview" hidden><div class="wrap" id="shareContent"></div></div>
 
 <div id="authScreen" class="authwrap" hidden>
   <div class="authcard">
@@ -555,6 +579,49 @@ async function afterSignIn(session){
   renderClaimScreen(unclaimed||[], session.user.id);
   $("#loadingScreen").hidden=true; $("#claimScreen").hidden=false;
 }
+/* ---------- public client share page (no login required) ---------- */
+let shareRefreshTimer = null;
+async function renderPublicShare(clientId){
+  $("#loadingScreen").hidden=false; $("#authScreen").hidden=true; $("#claimScreen").hidden=true; $("#app").hidden=true;
+  const fmtLong = d => { if(!d) return ""; const dt=new Date(d+"T00:00"); return dt.toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"}); };
+  const paint = async () => {
+    const [{data:info,error:e1},{data:tasks,error:e2}] = await Promise.all([
+      sb.rpc("get_client_share_info",{share_client_id:clientId}),
+      sb.rpc("get_client_share_tasks",{share_client_id:clientId}),
+    ]);
+    const row = (info && info[0]) || null;
+    if(e1 || e2 || !row){
+      $("#shareContent").innerHTML = `<h1>Link not found</h1><p class="smeta">This share link doesn't point to a client we know about — check it was copied in full.</p>`;
+      $("#loadingScreen").hidden=true; $("#shareScreen").hidden=false;
+      return;
+    }
+    $("#shareScreen").style.setProperty("--sharecolor", row.color);
+    const parsed = (tasks||[]).map(t=>{
+      let text=t.text, tag="";
+      const tm=text.match(/^\[([^\]]+)\]\s*/); if(tm){ tag=tm[1]; text=text.slice(tm[0].length); }
+      return {tag, text, status:STATUS_LABELS[t.status||"not_started"]||"Not started", due:t.due};
+    });
+    const groups={}, order=[];
+    parsed.forEach(p=>{ if(!(p.tag in groups)){groups[p.tag]=[]; order.push(p.tag);} groups[p.tag].push(p); });
+    const total=parsed.length, done=parsed.filter(p=>p.status==="Done").length;
+    const pct = total? Math.round(done/total*100) : 0;
+    const pill = s => `<span class="stpill ${s==="Done"?"done":s==="In progress"?"prog":"todo"}">${s}</span>`;
+    const sections = order.map(tag=>{
+      const rows = groups[tag].map(p=>`<li class="srow"><span class="stxt">${esc(p.text)}</span><span class="sright">${p.due?`<span class="sdue">${fmtLong(p.due)}</span>`:""}${pill(p.status)}</span></li>`).join("");
+      return `<div class="sgroup">${tag?`<h3>${esc(tag)}</h3>`:""}<ul class="slist">${rows}</ul></div>`;
+    }).join("");
+    $("#shareContent").innerHTML = `<h1>${esc(row.name)}</h1>
+      <div class="smeta">Progress overview — live, updated ${fmtLong(today())}</div>
+      <div class="prog"><div class="bar"><div class="fill" style="width:${pct}%;background:${row.color}"></div></div><div class="lbl"><span>${done} of ${total} complete</span><span>${pct}%</span></div></div>
+      ${sections || `<div class="smeta">No tasks yet.</div>`}
+      <footer>Shared from Tourstack — this page updates automatically.</footer>`;
+    $("#loadingScreen").hidden=true; $("#shareScreen").hidden=false;
+  };
+  await paint();
+  clearInterval(shareRefreshTimer);
+  shareRefreshTimer = setInterval(paint, 45000); // light polling so it reflects new changes without a manual reload
+}
+
 function renderClaimScreen(unclaimed, uid){
   const list=$("#claimList");
   list.innerHTML = unclaimed.map(p=>`<button type="button" class="claimbtn" data-id="${p.id}">${esc(p.name)}</button>`).join("")
@@ -790,60 +857,17 @@ function entriesList(){
 // Builds a standalone, read-only HTML snapshot for one client — task text,
 // status, and due date only. No "who", no estimated/logged hours, no
 // internal notes fields, no dependency on this app once downloaded.
-function shareClientView(cid){
+function copyShareLink(cid){
   const c = client(cid); if(!c) return;
-  const fmtLong = d => { if(!d) return ""; const dt=new Date(d+"T00:00"); return dt.toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"}); };
-  const parsed = S.tasks.filter(x=>x.client===cid).map(x=>{
-    let text = x.text, tag = "";
-    const tm = text.match(/^\[([^\]]+)\]\s*/); if(tm){ tag = tm[1]; text = text.slice(tm[0].length); }
-    const status = STATUS_LABELS[x.status||"not_started"] || "Not started";
-    return {tag, text, status, due:x.due};
-  });
-  const groups = {}, order = [];
-  parsed.forEach(p=>{ if(!(p.tag in groups)){groups[p.tag]=[]; order.push(p.tag);} groups[p.tag].push(p); });
-  const total = parsed.length, done = parsed.filter(p=>p.status==="Done").length;
-  const pct = total? Math.round(done/total*100) : 0;
-  const pill = s => `<span class="stpill ${s==="Done"?"done":s==="In progress"?"prog":"todo"}">${s}</span>`;
-  const sections = order.map(tag=>{
-    const rows = groups[tag].map(p=>`<li class="srow"><span class="stxt">${esc(p.text)}</span><span class="sright">${p.due?`<span class="sdue">${fmtLong(p.due)}</span>`:""}${pill(p.status)}</span></li>`).join("");
-    return `<div class="sgroup">${tag?`<h3>${esc(tag)}</h3>`:""}<ul class="slist">${rows}</ul></div>`;
-  }).join("");
-  const html = `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${esc(c.name)} — Progress</title><style>
-    :root{--paper:#F3F4F0;--card:#FFFFFF;--ink:#1B2620;--mute:#606963;--line:#D9DDD6;--route:${c.color};--route-soft:#DDE9E2;--tint:#EEF1EC;--r:6px}
-    *{box-sizing:border-box}
-    html,body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.5 "Avenir Next","Segoe UI",system-ui,-apple-system,sans-serif}
-    .wrap{max-width:640px;margin:0 auto;padding:44px 24px 60px}
-    h1{font-size:24px;font-weight:600;margin:0 0 4px;letter-spacing:-.02em}
-    .meta{color:var(--mute);font-size:14px;margin-bottom:28px}
-    .prog{margin-bottom:32px}
-    .prog .bar{height:10px;background:var(--tint);border-radius:6px;overflow:hidden}
-    .prog .fill{height:100%;background:var(--route)}
-    .prog .lbl{display:flex;justify-content:space-between;font-size:13px;color:var(--mute);margin-top:6px}
-    .sgroup{margin-bottom:22px}
-    .sgroup h3{font-size:13px;color:var(--mute);font-weight:600;margin:0 0 8px}
-    .slist{list-style:none;margin:0;padding:0;background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
-    .srow{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 14px;border-top:1px solid var(--line)}
-    .srow:first-child{border-top:0}
-    .stxt{font-size:14px}
-    .sright{display:flex;align-items:center;gap:8px;flex-shrink:0}
-    .sdue{font-size:12px;color:var(--mute)}
-    .stpill{font-size:12px;font-weight:600;padding:2px 9px;border-radius:10px;white-space:nowrap}
-    .stpill.done{background:var(--route-soft);color:var(--route)}
-    .stpill.prog{background:#FBEFD9;color:#8A6A1E}
-    .stpill.todo{background:var(--tint);color:var(--mute)}
-    footer{margin-top:30px;font-size:12px;color:var(--mute)}
-    @media print{body{background:#fff}.wrap{padding:0}}
-  </style></head><body><div class="wrap">
-    <h1>${esc(c.name)}</h1>
-    <div class="meta">Progress overview — updated ${fmtLong(today())}</div>
-    <div class="prog"><div class="bar"><div class="fill" style="width:${pct}%"></div></div><div class="lbl"><span>${done} of ${total} complete</span><span>${pct}%</span></div></div>
-    ${sections || `<div class="meta">No tasks yet.</div>`}
-  </div></body></html>`;
-  const a = document.createElement("a");
-  a.href = "data:text/html;charset=utf-8,"+encodeURIComponent(html);
-  a.download = c.name.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"")+"-progress.html";
-  a.click();
-  toast("Downloaded — ready to share");
+  const url = `${location.origin}/share/${c.id}`;
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(url).then(
+      ()=>toast("Link copied — anyone with it can view "+c.name+"'s progress"),
+      ()=>window.prompt("Copy this link:", url)
+    );
+  } else {
+    window.prompt("Copy this link:", url);
+  }
 }
 
 function renderMain(){
@@ -885,7 +909,7 @@ function renderMain(){
         <h3><button type="button" class="clink" data-goto="c:${c.id}" style="color:${c.color}">${esc(c.name)}</button><span>${fmtH(c.hrs||0)}h/wk</span></h3>
         ${c.staff?`<div class="kv">${esc(c.staff)}</div>`:""}
         <div class="kv ${st.key==="attention"?"attn":""}">${why}</div>
-        <div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap"><button type="button" class="btn-sm" data-goto="c:${c.id}">Open ${esc(c.name)} →</button><button type="button" class="btn-sm" data-share="${c.id}">Share client view ↗</button></div>
+        <div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap"><button type="button" class="btn-sm" data-goto="c:${c.id}">Open ${esc(c.name)} →</button><button type="button" class="btn-sm" data-share="${c.id}">Copy share link 🔗</button></div>
       </div>`;
     };
     const group = (label, key) => {
@@ -933,7 +957,7 @@ function renderMain(){
           <label class="chfield">Weekly hours<input type="number" data-f="hrs" min="0" step="0.5" value="${c.hrs||0}"></label>
           <label class="chfield">Staff support<input data-f="staff" value="${esc(c.staff)}" placeholder="—"></label>
           <label class="chfield">Contact<input data-f="contact" value="${esc(c.contact)}" placeholder="Name, email"></label>
-          <button type="button" class="btn-sm" data-share="${c.id}">Share client view ↗</button>
+          <button type="button" class="btn-sm" data-share="${c.id}">Copy share link 🔗</button>
         </div>
         <textarea class="chnotes" data-f="notes" placeholder="Notes — anything worth remembering">${esc(c.notes)}</textarea>
       </div>
@@ -990,7 +1014,7 @@ function bind(){
   const ac=m.querySelector("#addclient"); if(ac) ac.onsubmit=e=>{e.preventDefault(); const d=new FormData(ac);
     addClientRow(d.get("name").trim(), +d.get("hrs")||0); };
   m.querySelectorAll("[data-goto]").forEach(b=>b.onclick=()=>{S.view=b.dataset.goto;render();});
-  m.querySelectorAll("[data-share]").forEach(b=>b.onclick=()=>shareClientView(b.dataset.share));
+  m.querySelectorAll("[data-share]").forEach(b=>b.onclick=()=>copyShareLink(b.dataset.share));
   const moreExport=m.querySelector("#moreExport"); if(moreExport) moreExport.onclick=doExport;
   const moreSignout=m.querySelector("#moreSignout"); if(moreSignout) moreSignout.onclick=doSignOut;
   const swapClient=dir=>{ if(!S.view.startsWith("c:")) return; const idx=S.clients.findIndex(z=>z.id===S.view.slice(2));
@@ -1091,7 +1115,9 @@ $("#claimNewForm").onsubmit=async e=>{ e.preventDefault(); const d=new FormData(
   ME=data; await bootApp();
 };
 
-initAuth();
+const shareMatch = location.pathname.match(/^\/share\/([^/]+)/);
+if(shareMatch) renderPublicShare(decodeURIComponent(shareMatch[1]));
+else initAuth();
 </script>
 </body>
 </html>
