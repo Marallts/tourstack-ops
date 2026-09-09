@@ -20,14 +20,14 @@
   .app{display:grid;grid-template-columns:230px 1fr;min-height:100vh}
   @media (max-width:760px){
     .app{grid-template-columns:1fr}
-    .rail{position:sticky;top:0;z-index:5;border-right:0;border-bottom:1px solid var(--line);flex-direction:row;flex-wrap:wrap;align-items:center;padding:10px 12px;gap:8px 10px}
-    .rail h1{display:none}
-    .rail .nav{display:flex;flex-direction:row;flex:1 1 auto;gap:6px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:2px}
-    .rail .nav::-webkit-scrollbar{display:none}
-    .rail .nav button{flex-shrink:0}
-    .rail .foot{margin:0;flex:0 0 100%;order:3;justify-content:flex-end}
-    .rail .whoami{flex:1;padding:0;font-size:12px}
+    .rail{display:none}
+    .main{padding-bottom:84px}
+    .tabbar{position:fixed;left:0;right:0;bottom:0;z-index:10;display:flex;background:var(--card);border-top:1px solid var(--line);padding:6px 4px calc(6px + env(safe-area-inset-bottom))}
+    .tabbar button{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;background:none;border:0;padding:6px 2px;color:var(--mute);font-size:11px;border-radius:var(--r)}
+    .tabbar button .ic{font-size:19px;line-height:1}
+    .tabbar button.on{color:var(--route);font-weight:600}
   }
+  @media (min-width:761px){ .tabbar{display:none} }
 
   /* rail */
   .rail{background:var(--card);border-right:1px solid var(--line);padding:22px 16px;display:flex;flex-direction:column;gap:18px}
@@ -53,6 +53,24 @@
   .head{display:flex;align-items:baseline;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:18px}
   .head h2{font-size:26px;font-weight:600;margin:0;letter-spacing:-.02em}
   .head .sub{color:var(--mute)}
+
+  /* mobile client sub-nav: back + swap to prev/next client */
+  .csubnav{display:none}
+  @media (max-width:760px){
+    .csubnav{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
+    .csubnav .back{background:none;border:0;color:var(--mute);font-size:14px;padding:4px 0}
+    .csubnav .swap{display:flex;gap:4px}
+    .csubnav .swap button{background:var(--tint);border:0;border-radius:var(--r);width:32px;height:32px;font-size:16px;color:var(--ink)}
+    .csubnav .swap button:disabled{opacity:.35}
+  }
+
+  /* the "More" menu screen (mobile) */
+  .morelist{list-style:none;margin:0;padding:0;background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+  .morelist li{border-top:1px solid var(--line)}
+  .morelist li:first-child{border-top:0}
+  .morelist button{width:100%;text-align:left;background:none;border:0;padding:14px 16px;font-size:15px;display:flex;justify-content:space-between;align-items:center}
+  .morelist button .cnt{font-size:12px;color:var(--mute);background:var(--tint);border-radius:10px;padding:1px 7px}
+  .morewho{color:var(--mute);font-size:13px;padding:0 2px 10px}
 
   /* the 50-hour track — the one memorable element */
   .track{margin:6px 0 26px}
@@ -272,6 +290,7 @@
     </div>
   </aside>
   <main class="main" id="main"></main>
+  <nav class="tabbar" id="tabbar"></nav>
 </div>
 <div class="toast" id="toast"></div>
 
@@ -445,6 +464,25 @@ function renderNav(){
   b("Hours","hours");
   const g=document.createElement("button"); g.className="grp"+(S.view==="clients"?" on":""); g.textContent="Clients"; g.onclick=()=>{S.view="clients";render();}; n.appendChild(g);
   S.clients.forEach(c=>b(c.name,"c:"+c.id,open().filter(x=>x.client===c.id).length));
+  renderTabbar();
+}
+
+function renderTabbar(){
+  const t = $("#tabbar"); if(!t) return; t.innerHTML="";
+  const onClient = S.view.startsWith("c:");
+  const tabs = [
+    {label:"Calendar", ic:"◐", view:"cal", on: S.view==="cal"},
+    {label:"Clients", ic:"▤", view:"clients", on: S.view==="clients"||onClient},
+    {label:"Hours", ic:"◷", view:"hours", on: S.view==="hours"},
+    {label:"More", ic:"⋯", view:"more", on: S.view==="more"||S.view==="staff"||S.view==="free"},
+  ];
+  tabs.forEach(tb=>{
+    const el = document.createElement("button");
+    el.className = tb.on? "on":"";
+    el.innerHTML = `<span class="ic">${tb.ic}</span><span>${esc(tb.label)}</span>`;
+    el.onclick=()=>{S.view=tb.view;render();};
+    t.appendChild(el);
+  });
 }
 
 function track(){
@@ -691,9 +729,27 @@ function renderMain(){
       <div class="panel"><h3>Log time</h3>${addTimeForm()}</div>
       <div class="panel"><h3>Breakdown</h3>${periodSelector()}${groupSelector()}${hoursTable()}</div>
       <div class="panel"><h3>Entries<span>${entriesInRange().length}</span></h3>${entriesList()}</div>`;
+  } else if(v==="more"){
+    m.innerHTML = `<div class="head"><h2>More</h2></div>
+      <p class="morewho">Signed in as ${esc(ME.name)}</p>
+      <ul class="morelist">
+        <li><button type="button" data-goto="staff">Staff<span class="cnt">${open().filter(x=>S.staff.some(st=>st.name===x.who)).length}</span></button></li>
+        <li><button type="button" data-goto="free">Freelancers<span class="cnt">${open().filter(x=>(S.freelancers||[]).some(f=>f.name===x.who)).length}</span></button></li>
+        <li><button type="button" id="moreExport">Export</button></li>
+        <li><button type="button" id="moreSignout" class="danger">Sign out</button></li>
+      </ul>`;
   } else {
     const c = client(v.slice(2)); if(!c){S.view="cal";return renderMain();}
-    m.innerHTML = `<div class="head"><h2>${esc(c.name)}</h2><span class="sub">${open().filter(x=>x.client===c.id).length} open</span></div>
+    const idx = S.clients.findIndex(z=>z.id===c.id);
+    const prevC = S.clients[idx-1], nextC = S.clients[idx+1];
+    m.innerHTML = `<div class="csubnav">
+        <button type="button" class="back" data-goto="clients">← All clients</button>
+        <div class="swap">
+          <button type="button" data-swap="prev" ${prevC?"":"disabled"} aria-label="Previous client">‹</button>
+          <button type="button" data-swap="next" ${nextC?"":"disabled"} aria-label="Next client">›</button>
+        </div>
+      </div>
+      <div class="head"><h2>${esc(c.name)}</h2><span class="sub">${open().filter(x=>x.client===c.id).length} open</span></div>
       <div class="grid">
         <div class="panel"><h3>Client</h3><dl class="facts" data-client="${c.id}">
           <dt>Weekly hours</dt><dd><input type="number" data-f="hrs" min="0" step="0.5" value="${c.hrs||0}"></dd>
@@ -760,14 +816,26 @@ function bind(){
     addClientRow(d.get("name").trim(), +d.get("hrs")||0); };
   m.querySelectorAll("[data-goto]").forEach(b=>b.onclick=()=>{S.view=b.dataset.goto;render();});
   m.querySelectorAll("[data-share]").forEach(b=>b.onclick=()=>shareClientView(b.dataset.share));
+  const moreExport=m.querySelector("#moreExport"); if(moreExport) moreExport.onclick=doExport;
+  const moreSignout=m.querySelector("#moreSignout"); if(moreSignout) moreSignout.onclick=doSignOut;
+  const swapClient=dir=>{ if(!S.view.startsWith("c:")) return; const idx=S.clients.findIndex(z=>z.id===S.view.slice(2));
+    const target = dir==="next"? S.clients[idx+1] : S.clients[idx-1]; if(target){ S.view="c:"+target.id; render(); } };
+  m.querySelectorAll("[data-swap]").forEach(b=>b.onclick=()=>swapClient(b.dataset.swap));
+  // swipe left/right to move between clients on mobile — property assignment so re-render doesn't stack listeners
+  let touchX=null;
+  m.ontouchstart = e=>{ touchX = e.touches[0].clientX; };
+  m.ontouchend = e=>{ if(touchX==null) return; const dx = e.changedTouches[0].clientX - touchX; touchX=null;
+    if(Math.abs(dx) > 60){ swapClient(dx<0? "next":"prev"); } };
   m.querySelectorAll("[data-free]").forEach(p=>{const f=S.freelancers.find(z=>z.id===p.dataset.free);
     p.querySelectorAll("[data-f]").forEach(i=>i.onchange=()=>{f[i.dataset.f]=i.value;persist(sb.from("people").update({[i.dataset.f]:i.value}).eq("id",f.id));});
     p.querySelector(".rmfree").onclick=()=>removeFreelancer(f);});
   m.querySelectorAll(".facts").forEach(dl=>{ const c=client(dl.dataset.client); if(!c) return; dl.querySelectorAll("[data-f]").forEach(i=>i.onchange=()=>{ const v=i.type==="number"?+i.value:i.value; c[i.dataset.f]=v; persist(sb.from("clients").update({[i.dataset.f]:v}).eq("id",c.id)); if(i.dataset.f==="hrs") renderNav(); }); });
 }
 
-$("#export").onclick=()=>{ const a=document.createElement("a"); a.href="data:application/json,"+encodeURIComponent(JSON.stringify(S,null,2)); a.download="tourstack-ops-"+today()+".json"; a.click(); };
-$("#signout").onclick=async()=>{ await sb.auth.signOut(); location.reload(); };
+function doExport(){ const a=document.createElement("a"); a.href="data:application/json,"+encodeURIComponent(JSON.stringify(S,null,2)); a.download="tourstack-ops-"+today()+".json"; a.click(); }
+async function doSignOut(){ await sb.auth.signOut(); location.reload(); }
+$("#export").onclick=doExport;
+$("#signout").onclick=doSignOut;
 
 $("#authToggle").onclick=()=>{ authMode = authMode==="signin"?"signup":"signin";
   $("#authSubmit").textContent = authMode==="signin"?"Sign in":"Create account";
