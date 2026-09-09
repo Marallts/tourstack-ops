@@ -18,13 +18,17 @@
   a{color:var(--route)}
 
   .app{display:grid;grid-template-columns:230px 1fr;min-height:100vh}
+  .mtopbar{display:none}
   @media (max-width:760px){
     .app{grid-template-columns:1fr}
     .rail{display:none}
+    .mtopbar{display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:8;background:var(--card);border-bottom:1px solid var(--line);padding:12px 16px;font-weight:600}
+    .mtopbar #mAccountBtn{background:none;border:0;color:var(--mute);font-size:20px;line-height:1;padding:2px 8px;border-radius:var(--r)}
+    .mtopbar #mAccountBtn:hover{background:var(--tint)}
     .main{padding-bottom:84px}
-    .tabbar{position:fixed;left:0;right:0;bottom:0;z-index:10;display:flex;background:var(--card);border-top:1px solid var(--line);padding:6px 4px calc(6px + env(safe-area-inset-bottom))}
-    .tabbar button{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;background:none;border:0;padding:6px 2px;color:var(--mute);font-size:11px;border-radius:var(--r)}
-    .tabbar button .ic{font-size:19px;line-height:1}
+    .tabbar{position:fixed;left:0;right:0;bottom:0;z-index:10;display:flex;background:var(--card);border-top:1px solid var(--line);padding:6px 2px calc(6px + env(safe-area-inset-bottom))}
+    .tabbar button{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;background:none;border:0;padding:6px 1px;color:var(--mute);font-size:10px;border-radius:var(--r);line-height:1.2}
+    .tabbar button .ic{font-size:18px;line-height:1}
     .tabbar button.on{color:var(--route);font-weight:600}
   }
   @media (min-width:761px){ .tabbar{display:none} }
@@ -95,6 +99,15 @@
   .facts input:hover,.facts textarea:hover,.facts input:focus,.facts textarea:focus{border-bottom-color:var(--line)}
   .facts textarea{min-height:56px;line-height:1.4}
 
+  /* compact client header (replaces the old side-by-side client info panel) */
+  .clienthead{margin-bottom:20px;padding-bottom:14px;border-bottom:1px solid var(--line)}
+  .clienthead.facts{display:block}
+  .chrow{display:flex;flex-wrap:wrap;align-items:center;gap:18px;margin-bottom:6px}
+  .chfield{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--mute);font-weight:600}
+  .chfield input{width:auto;min-width:70px;font-size:14px;font-weight:400;color:var(--ink)}
+  .chrow .btn-sm{margin-left:auto}
+  .chnotes{font-size:13px;color:var(--mute);min-height:0!important;line-height:1.4}
+
   /* tasks */
   .add{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;align-items:center}
   .add input[type=text]{flex:1;min-width:160px;border:1px solid var(--line);border-radius:var(--r);padding:8px 10px;background:var(--paper);outline:none}
@@ -139,6 +152,18 @@
   .filters button{background:none;border:1px solid var(--line);border-radius:12px;padding:3px 10px;font-size:13px;color:var(--mute)}
   .filters button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
   .showdone{margin-top:8px;font-size:13px;color:var(--mute);background:none;border:0;padding:0;text-decoration:underline}
+  .statusgroup{margin-bottom:6px}
+  .statusgroup:last-child{margin-bottom:0}
+  .stghead{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:600;color:var(--ink);margin:0;padding:10px 2px;width:100%;text-align:left;background:none;border:0;border-top:1px solid var(--line)}
+  .statusgroup:first-child .stghead{border-top:0}
+  .stghead::before{content:"";width:7px;height:7px;border-radius:50%;flex:none}
+  .stghead.st-not_started::before{background:var(--line)}
+  .stghead.st-in_progress::before{background:#D9A63E}
+  .stghead.st-done::before{background:var(--ok)}
+  .stghead span{color:var(--mute);font-weight:400}
+  .stghead::after{content:"";width:7px;height:7px;border-right:1.5px solid var(--mute);border-bottom:1.5px solid var(--mute);transform:rotate(-45deg);margin-left:auto;transition:transform .15s}
+  .stghead[aria-expanded="true"]::after{transform:rotate(45deg)}
+  .grpflag{background:var(--warn-soft);color:var(--warn)!important;border-radius:10px;padding:0 7px;font-weight:600!important;font-size:12px}
 
   /* calendar */
   .calnav{display:flex;align-items:center;gap:8px;margin-bottom:10px;font-size:14px}
@@ -340,6 +365,10 @@
       <button id="signout" class="danger">Sign out</button>
     </div>
   </aside>
+  <div class="mtopbar">
+    <span>Tourstack</span>
+    <button type="button" id="mAccountBtn" aria-label="Account">⋯</button>
+  </div>
   <main class="main" id="main"></main>
   <nav class="tabbar" id="tabbar"></nav>
 </div>
@@ -399,7 +428,7 @@ const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 let S = {
   clients:[], tasks:[], timeEntries:[], staff:[], freelancers:[],
   timeView:{mode:"week",start:"",end:""}, timeGroupBy:"who", loggingFor:null,
-  calMonth:"", calDay:null, cap:50, view:"cal", filter:"all", showDone:false
+  calMonth:"", calDay:null, cap:50, view:"cal", filter:"all", groupOpen:{not_started:false,in_progress:false,done:false}
 };
 let ME = null; // this browser's `people` row, once identity is claimed
 const $ = s => document.querySelector(s);
@@ -574,9 +603,10 @@ function renderTabbar(){
   const onClient = S.view.startsWith("c:");
   const tabs = [
     {label:"Calendar", ic:"◐", view:"cal", on: S.view==="cal"},
-    {label:"Clients", ic:"▤", view:"clients", on: S.view==="clients"||onClient},
+    {label:"Staff", ic:"◑", view:"staff", on: S.view==="staff"},
+    {label:"Freelancers", ic:"◒", view:"free", on: S.view==="free"},
     {label:"Hours", ic:"◷", view:"hours", on: S.view==="hours"},
-    {label:"More", ic:"⋯", view:"more", on: S.view==="more"||S.view==="staff"||S.view==="free"},
+    {label:"Clients", ic:"▤", view:"clients", on: S.view==="clients"||onClient},
   ];
   tabs.forEach(tb=>{
     const el = document.createElement("button");
@@ -638,10 +668,6 @@ function taskList(list, opts={}){
   const f = S.filter;
   let items = list.filter(x=> f==="all" || (x.assignees||[]).includes(f));
   const needsLog = x => x.done && !loggedFor(x.id);
-  // a done task with no hours logged stays in the visible list (flagged) instead of
-  // dropping into the collapsed "done" bucket, so the reminder isn't hidden from view
-  const done = items.filter(x=>x.done && !needsLog(x)), live = items.filter(x=>!x.done || needsLog(x));
-  live.sort((a,b)=>(needsLog(b)-needsLog(a))||(b.pri-a.pri)||((a.due||"9")>(b.due||"9")?1:-1));
   const row = x => { const logged = loggedFor(x.id); const assignees = x.assignees||[]; const links = x.links||[];
     return `<li class="task ${x.done?"done":""}" data-id="${x.id}">
     <input type="checkbox" ${x.done?"checked":""} aria-label="Done">
@@ -656,9 +682,23 @@ function taskList(list, opts={}){
         <input type="number" name="hours" step="0.25" min="0" placeholder="Hours" required autofocus>
         <button type="submit">Log</button><button type="button" class="cancel">Cancel</button></form>`:""}</div>
     <div class="actions"><button class="logt" data-log="${x.id}" aria-label="Log time" title="Log time">⏰</button></div></li>`; };
-  let html = live.length? `<ul class="tasks">${live.map(row).join("")}</ul>` : `<div class="empty">Nothing open. Add one below or enjoy it.</div>`;
-  if(done.length) html += `<button class="showdone">${S.showDone?"Hide":"Show"} ${done.length} done</button>` + (S.showDone?`<ul class="tasks">${done.map(row).join("")}</ul>`:"");
-  return html;
+  const byDue = (a,b)=>(b.pri-a.pri)||((a.due||"9")>(b.due||"9")?1:-1);
+  const notStarted = items.filter(x=>!x.done && (x.status||"not_started")==="not_started").sort(byDue);
+  const inProgress = items.filter(x=>!x.done && x.status==="in_progress").sort(byDue);
+  const doneItems = items.filter(x=>x.done).sort((a,b)=>needsLog(b)-needsLog(a)); // unlogged-hours ones float to the top once expanded
+  if(!items.length) return `<div class="empty">Nothing open. Add one below or enjoy it.</div>`;
+  const group = (label, statusKey, rows) => {
+    if(!rows.length) return "";
+    const open = !!S.groupOpen[statusKey];
+    const flag = statusKey==="done" && rows.some(needsLog) ? ` <span class="grpflag">${rows.filter(needsLog).length} need hours logged</span>` : "";
+    return `<div class="statusgroup">
+      <button type="button" class="stghead st-${statusKey}" data-grouptoggle="${statusKey}" aria-expanded="${open}">${label}<span>${rows.length}</span>${flag}</button>
+      ${open?`<ul class="tasks">${rows.map(row).join("")}</ul>`:""}
+    </div>`;
+  };
+  return group("Not started","not_started",notStarted)
+    + group("In progress","in_progress",inProgress)
+    + group("Done","done",doneItems);
 }
 const filters = () => `<div class="filters">${["all",...PEOPLE()].map(p=>`<button class="${S.filter===p?"on":""}" data-f="${p}">${p==="all"?"Everyone":p}</button>`).join("")}</div>`;
 const addTaskBtn = (cid, due) => `<button type="button" class="addtaskbtn" data-addtask="1" data-client="${cid||""}" data-due="${due||""}">+ Add task</button>`;
@@ -827,11 +867,9 @@ function renderMain(){
       <div class="panel"><h3>Breakdown</h3>${periodSelector()}${groupSelector()}${hoursTable()}</div>
       <div class="panel"><h3>Entries<span>${entriesInRange().length}</span></h3>${entriesList()}</div>`;
   } else if(v==="more"){
-    m.innerHTML = `<div class="head"><h2>More</h2></div>
+    m.innerHTML = `<div class="head"><h2>Account</h2></div>
       <p class="morewho">Signed in as ${esc(ME.name)}</p>
       <ul class="morelist">
-        <li><button type="button" data-goto="staff">Staff<span class="cnt">${open().filter(x=>(x.assignees||[]).some(a=>S.staff.some(st=>st.name===a))).length}</span></button></li>
-        <li><button type="button" data-goto="free">Freelancers<span class="cnt">${open().filter(x=>(x.assignees||[]).some(a=>(S.freelancers||[]).some(f=>f.name===a))).length}</span></button></li>
         <li><button type="button" id="moreExport">Export</button></li>
         <li><button type="button" id="moreSignout" class="danger">Sign out</button></li>
       </ul>`;
@@ -847,17 +885,16 @@ function renderMain(){
         </div>
       </div>
       <div class="head"><h2>${esc(c.name)}</h2><span class="sub">${open().filter(x=>x.client===c.id).length} open</span></div>
-      <div class="grid">
-        <div class="panel"><h3>Client</h3><dl class="facts" data-client="${c.id}">
-          <dt>Weekly hours</dt><dd><input type="number" data-f="hrs" min="0" step="0.5" value="${c.hrs||0}"></dd>
-          <dt>Staff support</dt><dd><input data-f="staff" value="${esc(c.staff)}"></dd>
-          <dt>Contact</dt><dd><input data-f="contact" value="${esc(c.contact)}" placeholder="Name, email"></dd>
-          <dt>Notes</dt><dd><textarea data-f="notes" placeholder="Anything worth remembering">${esc(c.notes)}</textarea></dd>
-        </dl>
-        <div style="margin-top:12px"><button type="button" class="btn-sm" data-share="${c.id}">Share client view ↗</button></div>
+      <div class="clienthead facts" data-client="${c.id}">
+        <div class="chrow">
+          <label class="chfield">Weekly hours<input type="number" data-f="hrs" min="0" step="0.5" value="${c.hrs||0}"></label>
+          <label class="chfield">Staff support<input data-f="staff" value="${esc(c.staff)}" placeholder="—"></label>
+          <label class="chfield">Contact<input data-f="contact" value="${esc(c.contact)}" placeholder="Name, email"></label>
+          <button type="button" class="btn-sm" data-share="${c.id}">Share client view ↗</button>
         </div>
-        <div class="panel"><h3>Tasks</h3>${filters()}${addTaskBtn(c.id)}${taskList(S.tasks.filter(x=>x.client===c.id))}</div>
-      </div>`;
+        <textarea class="chnotes" data-f="notes" placeholder="Notes — anything worth remembering">${esc(c.notes)}</textarea>
+      </div>
+      ${filters()}${addTaskBtn(c.id)}${taskList(S.tasks.filter(x=>x.client===c.id))}`;
   }
   bind();
 }
@@ -904,7 +941,7 @@ function bind(){
   });
   m.querySelectorAll(".filters button").forEach(b=>{ if(b.closest("#periodf")||b.closest("#groupf")) return; // those have their own handlers above — don't clobber them
     b.onclick=()=>{S.filter=b.dataset.f;render();}; });
-  m.querySelectorAll(".showdone").forEach(b=>b.onclick=()=>{S.showDone=!S.showDone;render();});
+  m.querySelectorAll("[data-grouptoggle]").forEach(b=>b.onclick=()=>{ const k=b.dataset.grouptoggle; S.groupOpen[k]=!S.groupOpen[k]; render(); });
   const af=m.querySelector("#addfree"); if(af) af.onsubmit=e=>{e.preventDefault();const d=new FormData(af);
     addPerson({name:d.get("name").trim(),kind:"freelancer",role:d.get("role").trim(),rate:d.get("rate").trim(),contact:"",notes:""}).then(p=>{ if(p){ upsert(S.freelancers, p); render(); toast("Added"); } }); };
   const ac=m.querySelector("#addclient"); if(ac) ac.onsubmit=e=>{e.preventDefault(); const d=new FormData(ac);
@@ -988,6 +1025,7 @@ function doExport(){ const a=document.createElement("a"); a.href="data:applicati
 async function doSignOut(){ await sb.auth.signOut(); location.reload(); }
 $("#export").onclick=doExport;
 $("#signout").onclick=doSignOut;
+$("#mAccountBtn").onclick=()=>{S.view="more";render();};
 
 $("#authToggle").onclick=()=>{ authMode = authMode==="signin"?"signup":"signin";
   $("#authSubmit").textContent = authMode==="signin"?"Sign in":"Create account";
