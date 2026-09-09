@@ -6,9 +6,9 @@
 <title>Tourstack — Operations</title>
 <style>
   :root{
-    --paper:#F3F4F0; --card:#FFFFFF; --ink:#1B2620; --mute:#606963; --line:#D9DDD6;
-    --route:#2F6B4F; --route-soft:#DDE9E2; --warn:#AA3724; --warn-soft:#F7DED8;
-    --ee:#3D5A80; --tint:#EEF1EC;
+    --paper:#F6F6F4; --card:#FFFFFF; --ink:#17181A; --mute:#5B5E62; --line:#DDDDDB;
+    --route:#1C1D1F; --route-soft:#EDEDEB; --warn:#AA3724; --warn-soft:#F7DED8;
+    --ok:#2F6B4F; --ok-soft:#DDE9E2; --tint:#EFEFED;
     --r:6px;
   }
   *{box-sizing:border-box}
@@ -18,7 +18,16 @@
   a{color:var(--route)}
 
   .app{display:grid;grid-template-columns:230px 1fr;min-height:100vh}
-  @media (max-width:760px){.app{grid-template-columns:1fr}.rail{position:sticky;top:0;z-index:5;border-right:0;border-bottom:1px solid var(--line);flex-direction:row;overflow-x:auto;padding:10px 12px}.rail h1{display:none}.rail .nav{display:flex;gap:6px}.rail .foot{display:none}}
+  @media (max-width:760px){
+    .app{grid-template-columns:1fr}
+    .rail{position:sticky;top:0;z-index:5;border-right:0;border-bottom:1px solid var(--line);flex-direction:row;flex-wrap:wrap;align-items:center;padding:10px 12px;gap:8px 10px}
+    .rail h1{display:none}
+    .rail .nav{display:flex;flex-direction:row;flex:1 1 auto;gap:6px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:2px}
+    .rail .nav::-webkit-scrollbar{display:none}
+    .rail .nav button{flex-shrink:0}
+    .rail .foot{margin:0;flex:0 0 100%;order:3;justify-content:flex-end}
+    .rail .whoami{flex:1;padding:0;font-size:12px}
+  }
 
   /* rail */
   .rail{background:var(--card);border-right:1px solid var(--line);padding:22px 16px;display:flex;flex-direction:column;gap:18px}
@@ -80,7 +89,7 @@
   .tasks{list-style:none;margin:0;padding:0}
   .task{display:grid;grid-template-columns:20px 1fr auto;gap:10px;align-items:start;padding:8px 0;border-top:1px solid var(--line)}
   .task:first-child{border-top:0}
-  .task input[type=checkbox]{margin:3px 0 0;accent-color:var(--route);width:16px;height:16px}
+  .task input[type=checkbox]{margin:3px 0 0;accent-color:var(--ok);width:16px;height:16px}
   .task .t{display:flex;flex-direction:column;gap:2px}
   .task .t .txt{outline:none}
   .task .t .txt:focus{background:var(--tint);border-radius:3px}
@@ -89,12 +98,12 @@
   .task .meta .due.late{color:var(--warn);font-weight:600}
   .task .meta .nolog{background:var(--warn-soft);color:var(--warn);border:0;border-radius:10px;padding:1px 8px;font:inherit;font-size:12px;font-weight:600;cursor:pointer}
   .task .meta .nolog:hover{filter:brightness(.95)}
-  .task .meta .cl{color:var(--route)}
+  .task .meta .cl{font-weight:600}
   .task .meta .est{background:var(--tint);border-radius:10px;padding:0 4px 0 7px;display:flex;align-items:center;gap:2px}
   .task .meta .est input{width:26px;border:0;background:none;outline:none;text-align:right;padding:0;font:inherit;color:inherit;-moz-appearance:textfield}
   .task .meta .est input::-webkit-outer-spin-button,.task .meta .est input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
   .task .meta .est input:focus{color:var(--ink)}
-  .task .meta .logged{color:var(--route)}
+  .task .meta .logged{color:var(--ok)}
   .task .meta .logged.over{color:var(--warn);font-weight:600}
   .task.done .txt{text-decoration:line-through;color:var(--mute)}
   .task .x{background:none;border:0;color:var(--mute);font-size:16px;line-height:1;padding:2px 4px;opacity:0;border-radius:3px}
@@ -131,7 +140,7 @@
   .load{margin:6px 0 12px}
   .load .lb{display:flex;justify-content:space-between;font-size:13px;color:var(--mute);margin-bottom:4px}
   .load .b{height:10px;background:var(--tint);border-radius:5px;overflow:hidden}
-  .load .b i{display:block;height:100%;background:var(--route)}
+  .load .b i{display:block;height:100%;background:var(--ok)}
   .load .b i.over{background:var(--warn)}
   .alloc{display:grid;grid-template-columns:1fr auto;gap:4px 12px;font-size:14px}
   .alloc input{width:52px;border:0;border-bottom:1px dashed var(--line);text-align:right;background:none;outline:none}
@@ -184,6 +193,26 @@
   .clink:hover{text-decoration:underline}
   [hidden]{display:none !important}
   @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+  /* touchscreens have no :hover — controls that only reveal on hover must stay visible */
+  @media (hover:none){
+    .task .x, .task .logt, .entry .x { opacity:1 }
+  }
+  /* iOS Safari zooms the page on focusing any text input under 16px — keep typing inputs at 16px on phones */
+  @media (max-width:760px){
+    .add input[type=text], .add select, .add input[type=date], .add input[type=number],
+    .addtime input, .addtime select,
+    .timeform input, .timeform select,
+    .entry input, .entry select,
+    .authcard input,
+    .rangepick input,
+    .alloc input{ font-size:16px }
+    .tablewrap{ overflow-x:auto; -webkit-overflow-scrolling:touch; margin:0 -14px; padding:0 14px }
+    .calnav{ flex-wrap:wrap; row-gap:6px }
+    .rangepick{ flex-wrap:wrap }
+    .task .x, .task .logt{ padding:8px }
+    .entry .x{ padding:8px }
+  }
   /* auth / identity */
   #loadingScreen{display:flex;align-items:center;justify-content:center;height:100vh;color:var(--mute);font-size:14px}
   .authwrap{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}
@@ -476,7 +505,7 @@ function taskList(list, opts={}){
   const row = x => { const logged = loggedFor(x.id); return `<li class="task ${x.done?"done":""}" data-id="${x.id}">
     <input type="checkbox" ${x.done?"checked":""} aria-label="Done">
     <div class="t"><div class="txt" contenteditable="true" spellcheck="false">${esc(x.text)}</div>
-      <div class="meta">${opts.showClient?`<span class="cl">${esc(client(x.client)?.name||"")}</span>`:""}<span class="who">${esc(x.who)}</span>${x.due?`<span class="due ${(!x.done&&x.due<today())?"late":""}">${fmtDue(x.due)}</span>`:""}${x.pri?`<span>priority</span>`:""}<span class="est" title="Estimated hours"><input type="number" class="estinput" step="0.25" min="0" value="${x.est||""}" placeholder="–"> h est</span>${logged?`<span class="logged ${x.est&&logged>x.est?"over":""}">${fmtH(logged)}h logged</span>`:""}${needsLog(x)?`<button type="button" class="nolog" data-nolog="${x.id}" title="Marked done with no hours logged yet">⏰ Log hours</button>`:""}</div>
+      <div class="meta">${opts.showClient?`<span class="cl" style="color:${client(x.client)?.color||"inherit"}">${esc(client(x.client)?.name||"")}</span>`:""}<span class="who">${esc(x.who)}</span>${x.due?`<span class="due ${(!x.done&&x.due<today())?"late":""}">${fmtDue(x.due)}</span>`:""}${x.pri?`<span>priority</span>`:""}<span class="est" title="Estimated hours"><input type="number" class="estinput" step="0.25" min="0" value="${x.est||""}" placeholder="–"> h est</span>${logged?`<span class="logged ${x.est&&logged>x.est?"over":""}">${fmtH(logged)}h logged</span>`:""}${needsLog(x)?`<button type="button" class="nolog" data-nolog="${x.id}" title="Marked done with no hours logged yet">⏰ Log hours</button>`:""}</div>
       ${S.loggingFor===x.id?`<form class="timeform" data-tid="${x.id}">
         <input type="date" name="date" value="${today()}">
         <select name="who">${PEOPLE().map(p=>`<option ${p===x.who?"selected":""}>${esc(p)}</option>`).join("")}</select>
@@ -538,7 +567,7 @@ function hoursTable(){
   }).join("");
   const foot = inner.map(i=>{ const t = byClient? rowTotal(i) : colTotal(i.id); return `<th>${fmtH(t)}</th>`; }).join("");
   const empty = !entries.length ? `<div class="empty">No time logged for this period yet.</div>` : "";
-  return `${empty}<table class="hourstbl"><thead>${thead}</thead><tbody>${bodyRows}</tbody><tfoot><tr><th>Total</th>${foot}<th>${fmtH(grand)}</th></tr></tfoot></table>`;
+  return `${empty}<div class="tablewrap"><table class="hourstbl"><thead>${thead}</thead><tbody>${bodyRows}</tbody><tfoot><tr><th>Total</th>${foot}<th>${fmtH(grand)}</th></tr></tfoot></table></div>`;
 }
 
 function entriesList(){
