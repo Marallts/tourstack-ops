@@ -117,10 +117,17 @@
   .task .meta .nolog{background:var(--warn-soft);color:var(--warn);border:0;border-radius:10px;padding:1px 8px;font:inherit;font-size:12px;font-weight:600;cursor:pointer}
   .task .meta .nolog:hover{filter:brightness(.95)}
   .task .meta .cl{font-weight:600}
-  .task .meta .est{background:var(--tint);border-radius:10px;padding:0 4px 0 7px;display:flex;align-items:center;gap:2px}
-  .task .meta .est input{width:26px;border:0;background:none;outline:none;text-align:right;padding:0;font:inherit;color:inherit;-moz-appearance:textfield}
-  .task .meta .est input::-webkit-outer-spin-button,.task .meta .est input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
-  .task .meta .est input:focus{color:var(--ink)}
+  .task .meta .est{background:var(--tint);border-radius:10px;padding:0 7px}
+  .task .meta .priflag{background:var(--warn-soft);color:var(--warn);border-radius:10px;padding:0 7px;font-weight:600}
+  .statusbadge{border:0;border-radius:10px;padding:0 7px;font:inherit;font-size:12px;font-weight:600;line-height:1.6}
+  .statusbadge.st-not_started{background:var(--tint);color:var(--mute)}
+  .statusbadge.st-in_progress{background:#FBEFD9;color:#8A6A1E}
+  .statuspicker{display:flex;gap:6px;margin-top:6px}
+  .statuspicker button{flex:1;border:1px solid var(--line);border-radius:var(--r);padding:7px 4px;font-size:13px;background:none;color:var(--mute);font-weight:600}
+  .statuspicker button.on.st-not_started{background:var(--tint);color:var(--ink);border-color:var(--line)}
+  .statuspicker button.on.st-in_progress{background:#FBEFD9;color:#8A6A1E;border-color:#FBEFD9}
+  .statuspicker button.on.st-done{background:var(--ok-soft);color:var(--ok);border-color:var(--ok-soft)}
+  .task .meta .linkcount{background:var(--tint);border-radius:10px;padding:0 7px}
   .task .meta .logged{color:var(--ok)}
   .task .meta .logged.over{color:var(--warn);font-weight:600}
   .task.done .txt{text-decoration:line-through;color:var(--mute)}
@@ -209,6 +216,50 @@
   .kv b{color:var(--ink);font-weight:600}
   .clink{background:none;border:0;padding:0;font:inherit;font-weight:600;cursor:pointer}
   .clink:hover{text-decoration:underline}
+
+  /* task add/edit modal */
+  .addtaskbtn{width:100%;text-align:left;background:none;border:1px dashed var(--line);border-radius:var(--r);padding:10px 14px;font-size:14px;color:var(--mute);margin-bottom:10px}
+  .addtaskbtn:hover{border-color:var(--route);color:var(--ink)}
+  .task .tmain{cursor:pointer}
+  .modalveil{position:fixed;inset:0;z-index:20;background:rgba(23,24,26,.45);display:flex;align-items:center;justify-content:center;padding:20px}
+  .modal{background:var(--card);border-radius:12px;width:100%;max-width:480px;max-height:86vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+  .modalhead{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--line);flex:none}
+  .modalhead h3{margin:0;font-size:16px;font-weight:600}
+  .modalx{background:none;border:0;font-size:20px;color:var(--mute);line-height:1;padding:2px 6px;border-radius:4px}
+  .modalx:hover{background:var(--tint)}
+  .modalbody{padding:16px 18px;overflow-y:auto;flex:1;-webkit-overflow-scrolling:touch}
+  .mlabel{display:block;font-size:12px;color:var(--mute);font-weight:600;margin:0 0 14px}
+  .mlabel textarea,.mlabel input[type=date],.mlabel input[type=number],.mlabel select{display:block;width:100%;margin-top:5px;border:1px solid var(--line);border-radius:var(--r);padding:8px 10px;font-size:14px;background:var(--paper);font-weight:400;color:var(--ink)}
+  .mlabel textarea{resize:vertical;min-height:52px;font-family:inherit}
+  .mrow{display:flex;gap:12px}
+  .mrow .mlabel{flex:1}
+  .mcheck{display:flex;align-items:center;gap:8px;font-size:14px;margin-bottom:16px}
+  .mcheck input{width:16px;height:16px;accent-color:var(--route)}
+  .assignpicker{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+  .assignpicker button{border:1px solid var(--line);border-radius:14px;padding:5px 12px;font-size:13px;background:none;color:var(--ink);font-weight:400}
+  .assignpicker button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .linkslist:not(:empty){margin:6px 0 8px;border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+  .linkslist .linkrow{display:flex;align-items:center;gap:8px;padding:7px 10px;border-top:1px solid var(--line);font-size:13px;background:var(--card)}
+  .linkslist .linkrow:first-child{border-top:0}
+  .linkslist .linkrow a{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--route)}
+  .linkslist .linkrow button{background:none;border:0;color:var(--mute);font-size:15px;padding:2px 4px;flex:none}
+  .addlink{display:flex;gap:6px;margin-top:6px}
+  .addlink input{border:1px solid var(--line);border-radius:var(--r);padding:7px 8px;font-size:13px;background:var(--paper);font-weight:400}
+  .addlink input[type=text]{width:38%}
+  .addlink input[type=url]{flex:1;min-width:0}
+  .addlink button{background:var(--tint);border:0;border-radius:var(--r);padding:7px 12px;font-size:13px;font-weight:600;flex:none}
+  .modalfoot{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:14px 18px;border-top:1px solid var(--line);flex:none}
+  .modalfootright{display:flex;gap:8px}
+  .modalfootright button{padding:9px 16px;border-radius:var(--r);font-size:14px;font-weight:600;border:1px solid var(--line);background:none;color:var(--ink)}
+  .modalsave{background:var(--route)!important;color:#fff!important;border-color:var(--route)!important}
+  #taskDeleteBtn{background:none;border:1px solid var(--line);border-radius:var(--r);padding:9px 14px;font-size:14px;color:var(--warn)}
+  @media (max-width:760px){
+    .modalveil{align-items:flex-end;padding:0}
+    .modal{max-width:none;width:100%;max-height:88vh;border-radius:16px 16px 0 0}
+    .modalbody .mlabel textarea,.modalbody .mlabel input,.modalbody .mlabel select,.addlink input{font-size:16px}
+    .addlink{flex-wrap:wrap}
+    .addlink input[type=text],.addlink input[type=url]{width:100%}
+  }
   [hidden]{display:none !important}
   @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 
@@ -294,6 +345,43 @@
 </div>
 <div class="toast" id="toast"></div>
 
+<div id="taskModal" class="modalveil" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="taskModalTitle">
+    <div class="modalhead">
+      <h3 id="taskModalTitle">New task</h3>
+      <button type="button" class="modalx" id="taskModalClose" aria-label="Close">×</button>
+    </div>
+    <div class="modalbody">
+      <form id="taskForm">
+        <label class="mlabel">Task<textarea name="text" rows="2" required placeholder="What needs doing?"></textarea></label>
+        <div class="mlabel">Status<div class="statuspicker" id="statusPicker"></div></div>
+        <label class="mlabel" id="taskClientWrap" hidden>Client<select name="client" id="taskClientSelect"></select></label>
+        <div class="mlabel">Assignees<div class="assignpicker" id="assignPicker"></div></div>
+        <div class="mrow">
+          <label class="mlabel">Due<input type="date" name="due"></label>
+          <label class="mlabel">Est. hours<input type="number" name="est" step="0.25" min="0" placeholder="–"></label>
+        </div>
+        <label class="mcheck"><input type="checkbox" name="pri"> Priority</label>
+        <div class="mlabel">Links
+          <div class="linkslist" id="linksList"></div>
+          <div class="addlink">
+            <input type="text" id="linkLabel" placeholder="Label">
+            <input type="url" id="linkUrl" placeholder="https://…">
+            <button type="button" id="addLinkBtn">Add</button>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modalfoot">
+      <button type="button" class="danger" id="taskDeleteBtn" hidden>Delete</button>
+      <div class="modalfootright">
+        <button type="button" id="taskCancelBtn">Cancel</button>
+        <button type="submit" form="taskForm" class="modalsave">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script>
 /* ---------- data ---------- */
@@ -317,7 +405,7 @@ let ME = null; // this browser's `people` row, once identity is claimed
 const $ = s => document.querySelector(s);
 
 /* ---------- row <-> app-model mapping (DB columns differ slightly from the old local shape) ---------- */
-const mapTask = r => ({id:r.id, client:r.client_id, text:r.text, who:r.who, due:r.due||"", done:r.done, pri:r.pri, est:r.est});
+const mapTask = r => ({id:r.id, client:r.client_id, text:r.text, assignees:r.assignees||[], due:r.due||"", done:r.done, status:r.status||"not_started", pri:r.pri, est:r.est, links:r.links||[]});
 const mapEntry = r => ({id:r.id, client:r.client_id, taskId:r.task_id, who:r.who, date:r.date, hours:+r.hours, text:r.text||""});
 
 /* ---------- storage: Supabase, shared across the team ---------- */
@@ -339,10 +427,17 @@ async function loadData(){
 // fire-and-forget persist for optimistic local edits — UI already updated, this just syncs
 function persist(promise){ promise.then(({error})=>{ if(error) toast("Sync error: "+error.message); }); }
 
-async function addTask(clientId,text,who,due){
-  const {data,error} = await sb.from("tasks").insert({client_id:clientId,text,who,due:due||null}).select().single();
-  if(error) return toast("Error: "+error.message);
-  S.tasks.unshift(mapTask(data)); render(); toast("Added");
+async function saveTask(payload, id){
+  if(id){
+    const {data,error} = await sb.from("tasks").update(payload).eq("id",id).select().single();
+    if(error) return toast("Error: "+error.message);
+    const x=S.tasks.find(z=>z.id===id); if(x) Object.assign(x, mapTask(data));
+    render(); toast("Saved");
+  } else {
+    const {data,error} = await sb.from("tasks").insert(payload).select().single();
+    if(error) return toast("Error: "+error.message);
+    upsertFront(S.tasks, mapTask(data)); render(); toast("Added");
+  }
 }
 async function deleteTask(id){
   S.tasks=S.tasks.filter(z=>z.id!==id); render(); toast("Deleted");
@@ -351,7 +446,7 @@ async function deleteTask(id){
 async function addTimeEntry(row){
   const {data,error} = await sb.from("time_entries").insert(row).select().single();
   if(error) return toast("Error: "+error.message);
-  S.timeEntries.push(mapEntry(data)); render(); toast("Logged");
+  upsert(S.timeEntries, mapEntry(data)); render(); toast("Logged");
 }
 async function deleteTimeEntry(id){
   S.timeEntries=S.timeEntries.filter(z=>z.id!==id); render(); toast("Deleted");
@@ -361,7 +456,7 @@ async function addClientRow(name,hrs){
   const color = CLIENT_PALETTE[S.clients.length % CLIENT_PALETTE.length];
   const {data,error} = await sb.from("clients").insert({name,hrs,color,staff:"",contact:"",notes:""}).select().single();
   if(error) return toast("Error: "+error.message);
-  S.clients.push(data); render(); renderNav(); toast("Added");
+  upsert(S.clients, data); render(); renderNav(); toast("Added");
 }
 async function addPerson(row){
   const {data,error} = await sb.from("people").insert(row).select().single();
@@ -369,15 +464,22 @@ async function addPerson(row){
   return data;
 }
 async function removeFreelancer(f){
-  if(!confirm("Remove "+f.name+"? Their tasks will be reassigned to Oli.")) return;
-  S.tasks.forEach(x=>{if(x.who===f.name)x.who="Oli";});
-  S.freelancers=S.freelancers.filter(z=>z.id!==f.id); render();
-  persist(sb.from("tasks").update({who:"Oli"}).eq("who",f.name));
+  if(!confirm("Remove "+f.name+"? They'll be removed from any tasks they're assigned to.")) return;
+  const affected = S.tasks.filter(x=>(x.assignees||[]).includes(f.name));
+  affected.forEach(x=>{ x.assignees = x.assignees.filter(a=>a!==f.name); if(!x.assignees.length) x.assignees=["Oli"]; });
+  S.freelancers=S.freelancers.filter(z=>z.id!==f.id);
+  render();
   persist(sb.from("people").delete().eq("id",f.id));
+  affected.forEach(x=>persist(sb.from("tasks").update({assignees:x.assignees}).eq("id",x.id)));
 }
 
 /* ---------- realtime: keep every open tab in sync ---------- */
+// both upsert() (append-style) and upsertFront() (unshift-style) are duplicate-safe:
+// a realtime echo of our own insert can arrive before our own optimistic update runs
+// (the two happen on unpredictable relative timing), so every "add locally" path must
+// check for an existing id rather than blindly push/unshift.
 function upsert(arr, mapped){ const i=arr.findIndex(z=>z.id===mapped.id); if(i>=0) arr[i]=mapped; else arr.push(mapped); }
+function upsertFront(arr, mapped){ const i=arr.findIndex(z=>z.id===mapped.id); if(i>=0) arr[i]=mapped; else arr.unshift(mapped); }
 function subscribeRealtime(){
   sb.channel("tourstack-db")
     .on("postgres_changes",{event:"*",schema:"public",table:"clients"}, p=>{
@@ -459,8 +561,8 @@ function renderNav(){
   const n = $("#nav"); n.innerHTML="";
   const b=(label,view,cnt)=>{ const el=document.createElement("button"); el.className=S.view===view?"on":""; el.innerHTML=`<span>${esc(label)}</span>${cnt!=null?`<span class="cnt">${cnt}</span>`:""}`; el.onclick=()=>{S.view=view;render();}; n.appendChild(el); };
   b("Calendar","cal",open().length);
-  b("Staff","staff",open().filter(x=>S.staff.some(st=>st.name===x.who)).length);
-  b("Freelancers","free",open().filter(x=>(S.freelancers||[]).some(f=>f.name===x.who)).length);
+  b("Staff","staff",open().filter(x=>(x.assignees||[]).some(a=>S.staff.some(st=>st.name===a))).length);
+  b("Freelancers","free",open().filter(x=>(x.assignees||[]).some(a=>(S.freelancers||[]).some(f=>f.name===a))).length);
   b("Hours","hours");
   const g=document.createElement("button"); g.className="grp"+(S.view==="clients"?" on":""); g.textContent="Clients"; g.onclick=()=>{S.view="clients";render();}; n.appendChild(g);
   S.clients.forEach(c=>b(c.name,"c:"+c.id,open().filter(x=>x.client===c.id).length));
@@ -534,34 +636,32 @@ function calGrid(){
 
 function taskList(list, opts={}){
   const f = S.filter;
-  let items = list.filter(x=> f==="all" || x.who===f);
+  let items = list.filter(x=> f==="all" || (x.assignees||[]).includes(f));
   const needsLog = x => x.done && !loggedFor(x.id);
   // a done task with no hours logged stays in the visible list (flagged) instead of
   // dropping into the collapsed "done" bucket, so the reminder isn't hidden from view
   const done = items.filter(x=>x.done && !needsLog(x)), live = items.filter(x=>!x.done || needsLog(x));
   live.sort((a,b)=>(needsLog(b)-needsLog(a))||(b.pri-a.pri)||((a.due||"9")>(b.due||"9")?1:-1));
-  const row = x => { const logged = loggedFor(x.id); return `<li class="task ${x.done?"done":""}" data-id="${x.id}">
+  const row = x => { const logged = loggedFor(x.id); const assignees = x.assignees||[]; const links = x.links||[];
+    return `<li class="task ${x.done?"done":""}" data-id="${x.id}">
     <input type="checkbox" ${x.done?"checked":""} aria-label="Done">
-    <div class="t"><div class="txt" contenteditable="true" spellcheck="false">${esc(x.text)}</div>
-      <div class="meta">${opts.showClient?`<span class="cl" style="color:${client(x.client)?.color||"inherit"}">${esc(client(x.client)?.name||"")}</span>`:""}<span class="who">${esc(x.who)}</span>${x.due?`<span class="due ${(!x.done&&x.due<today())?"late":""}">${fmtDue(x.due)}</span>`:""}${x.pri?`<span>priority</span>`:""}<span class="est" title="Estimated hours"><input type="number" class="estinput" step="0.25" min="0" value="${x.est||""}" placeholder="–"> h est</span>${logged?`<span class="logged ${x.est&&logged>x.est?"over":""}">${fmtH(logged)}h logged</span>`:""}${needsLog(x)?`<button type="button" class="nolog" data-nolog="${x.id}" title="Marked done with no hours logged yet">⏰ Log hours</button>`:""}</div>
+    <div class="t">
+      <div class="tmain" data-open="${x.id}">
+        <div class="txt">${esc(x.text)}</div>
+        <div class="meta">${opts.showClient?`<span class="cl" style="color:${client(x.client)?.color||"inherit"}">${esc(client(x.client)?.name||"")}</span>`:""}${!x.done?`<button type="button" class="statusbadge st-${x.status||"not_started"}" data-statuscycle="${x.id}" title="Click to update status">${x.status==="in_progress"?"In progress":"Not started"}</button>`:""}${assignees.map(a=>`<span class="who">${esc(a)}</span>`).join("")}${x.due?`<span class="due ${(!x.done&&x.due<today())?"late":""}">${fmtDue(x.due)}</span>`:""}${x.pri?`<span class="priflag">priority</span>`:""}${x.est?`<span class="est">${fmtH(x.est)}h est</span>`:""}${logged?`<span class="logged ${x.est&&logged>x.est?"over":""}">${fmtH(logged)}h logged</span>`:""}${links.length?`<span class="linkcount">🔗 ${links.length}</span>`:""}${needsLog(x)?`<button type="button" class="nolog" data-nolog="${x.id}" title="Marked done with no hours logged yet">⏰ Log hours</button>`:""}</div>
+      </div>
       ${S.loggingFor===x.id?`<form class="timeform" data-tid="${x.id}">
         <input type="date" name="date" value="${today()}">
-        <select name="who">${PEOPLE().map(p=>`<option ${p===x.who?"selected":""}>${esc(p)}</option>`).join("")}</select>
+        <select name="who">${PEOPLE().map(p=>`<option ${p===assignees[0]?"selected":""}>${esc(p)}</option>`).join("")}</select>
         <input type="number" name="hours" step="0.25" min="0" placeholder="Hours" required autofocus>
         <button type="submit">Log</button><button type="button" class="cancel">Cancel</button></form>`:""}</div>
-    <div class="actions"><button class="logt" data-log="${x.id}" aria-label="Log time" title="Log time">⏰</button><button class="x" aria-label="Delete">×</button></div></li>`; };
+    <div class="actions"><button class="logt" data-log="${x.id}" aria-label="Log time" title="Log time">⏰</button></div></li>`; };
   let html = live.length? `<ul class="tasks">${live.map(row).join("")}</ul>` : `<div class="empty">Nothing open. Add one below or enjoy it.</div>`;
   if(done.length) html += `<button class="showdone">${S.showDone?"Hide":"Show"} ${done.length} done</button>` + (S.showDone?`<ul class="tasks">${done.map(row).join("")}</ul>`:"");
   return html;
 }
 const filters = () => `<div class="filters">${["all",...PEOPLE()].map(p=>`<button class="${S.filter===p?"on":""}" data-f="${p}">${p==="all"?"Everyone":p}</button>`).join("")}</div>`;
-const addForm = (cid, defDue) => `<form class="add" data-client="${cid||""}">
-  <input type="text" name="text" placeholder="Add a task" required autocomplete="off">
-  ${cid?"":`<select name="client">${S.clients.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join("")}</select>`}
-  <select name="who">${PEOPLE().map(p=>`<option>${p}</option>`).join("")}</select>
-  <label class="fld">Due<input type="date" name="due" value="${esc(defDue||"")}" title="Deadline for this task (optional) — not the start date"></label>
-  <input type="number" name="est" step="0.25" min="0" placeholder="Est. hrs">
-  <button type="submit">Add</button></form>`;
+const addTaskBtn = (cid, due) => `<button type="button" class="addtaskbtn" data-addtask="1" data-client="${cid||""}" data-due="${due||""}">+ Add task</button>`;
 
 function periodSelector(){
   const v = S.timeView;
@@ -631,10 +731,7 @@ function shareClientView(cid){
   const parsed = S.tasks.filter(x=>x.client===cid).map(x=>{
     let text = x.text, tag = "";
     const tm = text.match(/^\[([^\]]+)\]\s*/); if(tm){ tag = tm[1]; text = text.slice(tm[0].length); }
-    let status;
-    if(x.done) status = "Done";
-    else if(/\(in progress\)\s*$/i.test(text)){ status = "In progress"; text = text.replace(/\s*\(in progress\)\s*$/i,""); }
-    else status = "Not started";
+    const status = STATUS_LABELS[x.status||"not_started"] || "Not started";
     return {tag, text, status, due:x.due};
   });
   const groups = {}, order = [];
@@ -694,22 +791,22 @@ function renderMain(){
     m.innerHTML = `<div class="head"><h2>Calendar</h2><span class="sub">${open().length} open${late?` · <span class="danger">${late} overdue</span>`:""}${unlogged?` · <span class="danger">${unlogged} need hours logged</span>`:""}</span></div>
       <div class="grid">
         <div class="panel"><h3>${monthLabel(S.calMonth)}</h3>${calNav()}${calGrid()}</div>
-        <div class="panel"><h3>${S.calDay?`Due ${fmtDue(S.calDay)}`:"Dated tasks"}${S.calDay?` <button type="button" class="btn-sm" data-cal="clear">Show all</button>`:""}</h3>${filters()}${addForm(undefined,S.calDay||"")}${taskList(dayList,{showClient:true})}</div>
+        <div class="panel"><h3>${S.calDay?`Due ${fmtDue(S.calDay)}`:"Dated tasks"}${S.calDay?` <button type="button" class="btn-sm" data-cal="clear">Show all</button>`:""}</h3>${filters()}${addTaskBtn("",S.calDay||"")}${taskList(dayList,{showClient:true})}</div>
       </div>
       <div class="panel" style="margin-top:16px"><h3>No date<span>${undated.filter(x=>!x.done).length}</span></h3>${taskList(undated,{showClient:true})}</div>`;
   } else if(v==="staff"){
     m.innerHTML = `<div class="head"><h2>Staff</h2><span class="sub">who is doing what</span></div>
       <div class="grid">${S.staff.map(s=>{         return `<div class="panel" data-staff="${s.id}"><h3>${esc(s.name)}</h3>
-        <h3>Open tasks<span>${open().filter(x=>x.who===s.name).length}</span></h3>
-        ${taskList(S.tasks.filter(x=>x.who===s.name),{showClient:true})}</div>`;}).join("")}</div>`;
+        <h3>Open tasks<span>${open().filter(x=>(x.assignees||[]).includes(s.name)).length}</span></h3>
+        ${taskList(S.tasks.filter(x=>(x.assignees||[]).includes(s.name)),{showClient:true})}</div>`;}).join("")}</div>`;
   } else if(v==="free"){
     const fl=S.freelancers;
     m.innerHTML = `<div class="head"><h2>Freelancers</h2><span class="sub">${fl.length} on the books</span></div>
       <form class="add" id="addfree"><input type="text" name="name" placeholder="Name" required autocomplete="off"><input type="text" name="role" placeholder="What they do" autocomplete="off"><input type="text" name="rate" placeholder="Rate" autocomplete="off"><button type="submit">Add freelancer</button></form>
       ${fl.length?`<div class="grid">${fl.map(f=>`<div class="panel" data-free="${f.id}"><h3>${esc(f.name)}<span>${esc([f.role,f.rate].filter(Boolean).join(" · "))}</span></h3>
         <dl class="facts"><dt>Contact</dt><dd><input data-f="contact" value="${esc(f.contact||"")}" placeholder="Email or phone"></dd><dt>Notes</dt><dd><textarea data-f="notes" placeholder="Anything worth remembering">${esc(f.notes||"")}</textarea></dd></dl>
-        <h3 style="margin-top:14px">Open tasks<span>${open().filter(x=>x.who===f.name).length}</span></h3>
-        ${taskList(S.tasks.filter(x=>x.who===f.name),{showClient:true})}
+        <h3 style="margin-top:14px">Open tasks<span>${open().filter(x=>(x.assignees||[]).includes(f.name)).length}</span></h3>
+        ${taskList(S.tasks.filter(x=>(x.assignees||[]).includes(f.name)),{showClient:true})}
         <div style="margin-top:10px"><button class="btn-sm rmfree">Remove ${esc(f.name)}</button></div></div>`).join("")}</div>`:`<div class="empty">No freelancers yet. Add one above and they'll appear in every task owner list.</div>`}`;
   } else if(v==="clients"){
     m.innerHTML = `<div class="head"><h2>Clients</h2><span class="sub">${S.clients.length} on the books</span></div>
@@ -733,8 +830,8 @@ function renderMain(){
     m.innerHTML = `<div class="head"><h2>More</h2></div>
       <p class="morewho">Signed in as ${esc(ME.name)}</p>
       <ul class="morelist">
-        <li><button type="button" data-goto="staff">Staff<span class="cnt">${open().filter(x=>S.staff.some(st=>st.name===x.who)).length}</span></button></li>
-        <li><button type="button" data-goto="free">Freelancers<span class="cnt">${open().filter(x=>(S.freelancers||[]).some(f=>f.name===x.who)).length}</span></button></li>
+        <li><button type="button" data-goto="staff">Staff<span class="cnt">${open().filter(x=>(x.assignees||[]).some(a=>S.staff.some(st=>st.name===a))).length}</span></button></li>
+        <li><button type="button" data-goto="free">Freelancers<span class="cnt">${open().filter(x=>(x.assignees||[]).some(a=>(S.freelancers||[]).some(f=>f.name===a))).length}</span></button></li>
         <li><button type="button" id="moreExport">Export</button></li>
         <li><button type="button" id="moreSignout" class="danger">Sign out</button></li>
       </ul>`;
@@ -759,7 +856,7 @@ function renderMain(){
         </dl>
         <div style="margin-top:12px"><button type="button" class="btn-sm" data-share="${c.id}">Share client view ↗</button></div>
         </div>
-        <div class="panel"><h3>Tasks</h3>${filters()}${addForm(c.id)}${taskList(S.tasks.filter(x=>x.client===c.id))}</div>
+        <div class="panel"><h3>Tasks</h3>${filters()}${addTaskBtn(c.id)}${taskList(S.tasks.filter(x=>x.client===c.id))}</div>
       </div>`;
   }
   bind();
@@ -768,18 +865,16 @@ function renderMain(){
 /* ---------- events ---------- */
 function bind(){
   const m = $("#main");
-  m.querySelectorAll("form.add").forEach(f=>f.onsubmit=e=>{ e.preventDefault(); const d=new FormData(f);
-    addTask(f.dataset.client||d.get("client"), d.get("text").trim(), d.get("who"), d.get("due")).then(()=>{
-      const est=+d.get("est")||0; if(est){ const x=S.tasks[0]; if(x){ x.est=est; persist(sb.from("tasks").update({est}).eq("id",x.id)); render(); } }
-    }); });
+  m.querySelectorAll("[data-addtask]").forEach(b=>b.onclick=()=>openTaskModal({clientId:b.dataset.client||null, due:b.dataset.due||null}));
   m.querySelectorAll(".task").forEach(li=>{ const x=S.tasks.find(z=>z.id===li.dataset.id); if(!x) return;
-    li.querySelector("input[type=checkbox]").onchange=e=>{x.done=e.target.checked;render();persist(sb.from("tasks").update({done:x.done}).eq("id",x.id));};
-    const estInp=li.querySelector(".estinput"); if(estInp) estInp.onchange=()=>{x.est=+estInp.value||0;render();persist(sb.from("tasks").update({est:x.est}).eq("id",x.id));};
-    const txt=li.querySelector(".txt"); txt.onblur=()=>{const v=txt.textContent.trim(); if(v&&v!==x.text){x.text=v;persist(sb.from("tasks").update({text:v}).eq("id",x.id));}}; txt.onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();txt.blur();}};
-    txt.ondblclick=()=>{x.pri=!x.pri;render();persist(sb.from("tasks").update({pri:x.pri}).eq("id",x.id));};
+    li.querySelector("input[type=checkbox]").onchange=e=>{ x.done=e.target.checked; x.status=x.done?"done":"not_started"; render();
+      persist(sb.from("tasks").update({done:x.done,status:x.status}).eq("id",x.id)); };
+    li.querySelector("[data-open]").onclick=()=>openTaskModal({taskId:x.id});
+    const sb2=li.querySelector("[data-statuscycle]"); if(sb2) sb2.onclick=e=>{ e.stopPropagation();
+      x.status = x.status==="in_progress"? "not_started" : "in_progress"; render();
+      persist(sb.from("tasks").update({status:x.status}).eq("id",x.id)); };
     li.querySelector(".logt").onclick=()=>{S.loggingFor = S.loggingFor===x.id? null : x.id; render();};
     const nolog=li.querySelector(".nolog"); if(nolog) nolog.onclick=()=>{S.loggingFor = S.loggingFor===x.id? null : x.id; render();};
-    li.querySelector(".x").onclick=()=>deleteTask(x.id);
     const tf=li.querySelector(".timeform"); if(tf){
       tf.onsubmit=e=>{ e.preventDefault(); const d=new FormData(tf); const hrs=+d.get("hours"); if(!hrs) return;
         S.loggingFor=null;
@@ -811,7 +906,7 @@ function bind(){
     b.onclick=()=>{S.filter=b.dataset.f;render();}; });
   m.querySelectorAll(".showdone").forEach(b=>b.onclick=()=>{S.showDone=!S.showDone;render();});
   const af=m.querySelector("#addfree"); if(af) af.onsubmit=e=>{e.preventDefault();const d=new FormData(af);
-    addPerson({name:d.get("name").trim(),kind:"freelancer",role:d.get("role").trim(),rate:d.get("rate").trim(),contact:"",notes:""}).then(p=>{ if(p){ S.freelancers.push(p); render(); toast("Added"); } }); };
+    addPerson({name:d.get("name").trim(),kind:"freelancer",role:d.get("role").trim(),rate:d.get("rate").trim(),contact:"",notes:""}).then(p=>{ if(p){ upsert(S.freelancers, p); render(); toast("Added"); } }); };
   const ac=m.querySelector("#addclient"); if(ac) ac.onsubmit=e=>{e.preventDefault(); const d=new FormData(ac);
     addClientRow(d.get("name").trim(), +d.get("hrs")||0); };
   m.querySelectorAll("[data-goto]").forEach(b=>b.onclick=()=>{S.view=b.dataset.goto;render();});
@@ -831,6 +926,63 @@ function bind(){
     p.querySelector(".rmfree").onclick=()=>removeFreelancer(f);});
   m.querySelectorAll(".facts").forEach(dl=>{ const c=client(dl.dataset.client); if(!c) return; dl.querySelectorAll("[data-f]").forEach(i=>i.onchange=()=>{ const v=i.type==="number"?+i.value:i.value; c[i.dataset.f]=v; persist(sb.from("clients").update({[i.dataset.f]:v}).eq("id",c.id)); if(i.dataset.f==="hrs") renderNav(); }); });
 }
+
+/* ---------- task add/edit modal ---------- */
+let modalTask = null; // {id, clientId, assignees, links, status} — null when the modal is closed
+function openTaskModal({taskId, clientId, due}={}){
+  const x = taskId ? S.tasks.find(z=>z.id===taskId) : null;
+  modalTask = { id: x?x.id:null, clientId: x? x.client : clientId, assignees: x? [...(x.assignees||[])] : [], links: x? [...(x.links||[])] : [], status: x? (x.status||"not_started") : "not_started" };
+  $("#taskModalTitle").textContent = x? "Edit task" : "New task";
+  const f = $("#taskForm");
+  f.querySelector("[name=text]").value = x? x.text : "";
+  f.querySelector("[name=due]").value = x? (x.due||"") : (due||"");
+  f.querySelector("[name=est]").value = x? (x.est||"") : "";
+  f.querySelector("[name=pri]").checked = x? !!x.pri : false;
+  const clientWrap = $("#taskClientWrap");
+  if(!modalTask.clientId){
+    clientWrap.hidden=false;
+    $("#taskClientSelect").innerHTML = S.clients.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join("");
+  } else clientWrap.hidden=true;
+  $("#taskDeleteBtn").hidden = !x;
+  renderStatusPicker();
+  renderAssignPicker();
+  renderLinksList();
+  $("#taskModal").hidden=false;
+}
+function closeTaskModal(){ $("#taskModal").hidden=true; modalTask=null; }
+const STATUS_LABELS = {not_started:"Not started", in_progress:"In progress", done:"Done"};
+function renderStatusPicker(){
+  const box = $("#statusPicker");
+  box.innerHTML = Object.keys(STATUS_LABELS).map(s=>`<button type="button" class="st-${s} ${modalTask.status===s?"on":""}" data-status="${s}">${STATUS_LABELS[s]}</button>`).join("");
+  box.querySelectorAll("button").forEach(b=>b.onclick=()=>{ modalTask.status=b.dataset.status; renderStatusPicker(); });
+}
+function renderAssignPicker(){
+  const box = $("#assignPicker"); box.innerHTML = PEOPLE().map(p=>`<button type="button" class="${modalTask.assignees.includes(p)?"on":""}" data-person="${esc(p)}">${esc(p)}</button>`).join("");
+  box.querySelectorAll("button").forEach(b=>b.onclick=()=>{ const p=b.dataset.person;
+    if(modalTask.assignees.includes(p)) modalTask.assignees = modalTask.assignees.filter(a=>a!==p);
+    else modalTask.assignees.push(p);
+    renderAssignPicker(); });
+}
+function renderLinksList(){
+  const box = $("#linksList");
+  box.innerHTML = modalTask.links.map((l,i)=>`<div class="linkrow"><a href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.label||l.url)}</a><button type="button" data-rmlink="${i}" aria-label="Remove link">×</button></div>`).join("");
+  box.querySelectorAll("[data-rmlink]").forEach(b=>b.onclick=()=>{ modalTask.links.splice(+b.dataset.rmlink,1); renderLinksList(); });
+}
+$("#taskModalClose").onclick = closeTaskModal;
+$("#taskCancelBtn").onclick = closeTaskModal;
+$("#taskModal").addEventListener("click", e=>{ if(e.target.id==="taskModal") closeTaskModal(); });
+document.addEventListener("keydown", e=>{ if(e.key==="Escape" && !$("#taskModal").hidden) closeTaskModal(); });
+$("#taskDeleteBtn").onclick = ()=>{ if(modalTask?.id && confirm("Delete this task?")){ deleteTask(modalTask.id); closeTaskModal(); } };
+$("#addLinkBtn").onclick = ()=>{ const label=$("#linkLabel").value.trim(); const url=$("#linkUrl").value.trim(); if(!url) return;
+  modalTask.links.push({label, url}); $("#linkLabel").value=""; $("#linkUrl").value=""; renderLinksList(); };
+$("#taskForm").onsubmit = e=>{ e.preventDefault(); const d = new FormData(e.target);
+  const text = d.get("text").trim(); if(!text) return;
+  const clientId = modalTask.clientId || d.get("client"); if(!clientId) return;
+  const payload = { text, client_id: clientId, assignees: modalTask.assignees, due: d.get("due")||null, est: d.get("est")? +d.get("est") : null, pri: !!d.get("pri"), links: modalTask.links, status: modalTask.status, done: modalTask.status==="done" };
+  const editId = modalTask.id;
+  closeTaskModal();
+  saveTask(payload, editId);
+};
 
 function doExport(){ const a=document.createElement("a"); a.href="data:application/json,"+encodeURIComponent(JSON.stringify(S,null,2)); a.download="tourstack-ops-"+today()+".json"; a.click(); }
 async function doSignOut(){ await sb.auth.signOut(); location.reload(); }
