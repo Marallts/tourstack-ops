@@ -165,6 +165,16 @@
   .stghead[aria-expanded="true"]::after{transform:rotate(45deg)}
   .grpflag{background:var(--warn-soft);color:var(--warn)!important;border-radius:10px;padding:0 7px;font-weight:600!important;font-size:12px}
 
+  /* client status dashboard headers — same dot language as task groups, but static (no collapse) */
+  .dashhead{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:600;color:var(--ink);margin:0;padding:10px 2px;border-top:1px solid var(--line)}
+  .statusgroup:first-child .dashhead{border-top:0;padding-top:0}
+  .dashhead::before{content:"";width:7px;height:7px;border-radius:50%;flex:none}
+  .dashhead.st-attention::before{background:var(--warn)}
+  .dashhead.st-active::before{background:#D9A63E}
+  .dashhead.st-not_started::before{background:var(--line)}
+  .dashhead.st-caught_up::before{background:var(--ok)}
+  .dashhead span{color:var(--mute);font-weight:400}
+
   /* calendar */
   .calnav{display:flex;align-items:center;gap:8px;margin-bottom:10px;font-size:14px}
   .calnav button[data-cal]{background:none;border:1px solid var(--line);border-radius:var(--r);padding:4px 10px;color:var(--ink);line-height:1}
@@ -239,6 +249,7 @@
   .btn-sm:hover{color:var(--ink)}
   .kv{font-size:13px;color:var(--mute)}
   .kv b{color:var(--ink);font-weight:600}
+  .kv.attn{color:var(--warn);font-weight:600}
   .clink{background:none;border:0;padding:0;font:inherit;font-weight:600;cursor:pointer}
   .clink:hover{text-decoration:underline}
 
@@ -582,6 +593,20 @@ function timeRange(){ const v=S.timeView, t=today();
 const entriesInRange = () => { const [s,e]=timeRange(); return (S.timeEntries||[]).filter(x=>(!s||x.date>=s)&&(!e||x.date<=e)); };
 const fmtH = n => (Math.round((n||0)*100)/100).toString();
 const loggedFor = id => (S.timeEntries||[]).filter(x=>x.taskId===id).reduce((a,x)=>a+(+x.hours||0),0);
+// A client's status is derived live from their tasks, not a manual field:
+// attention (overdue or done-but-unlogged) > active (something in progress) >
+// not_started (open tasks, none started) > caught_up (nothing open)
+function clientStatus(c){
+  const tasks = S.tasks.filter(x=>x.client===c.id);
+  const openTasks = tasks.filter(x=>!x.done);
+  const overdue = openTasks.filter(x=>x.due && x.due<today()).length;
+  const unlogged = tasks.filter(x=>x.done && !loggedFor(x.id)).length;
+  const inProgress = openTasks.filter(x=>x.status==="in_progress").length;
+  if(overdue || unlogged) return {key:"attention", overdue, unlogged};
+  if(inProgress) return {key:"active", inProgress};
+  if(openTasks.length) return {key:"not_started", count:openTasks.length};
+  return {key:"caught_up"};
+}
 
 /* ---------- render ---------- */
 function render(){ renderNav(); renderMain(); }
@@ -849,6 +874,25 @@ function renderMain(){
         ${taskList(S.tasks.filter(x=>(x.assignees||[]).includes(f.name)),{showClient:true})}
         <div style="margin-top:10px"><button class="btn-sm rmfree">Remove ${esc(f.name)}</button></div></div>`).join("")}</div>`:`<div class="empty">No freelancers yet. Add one above and they'll appear in every task owner list.</div>`}`;
   } else if(v==="clients"){
+    const buckets = {attention:[], active:[], not_started:[], caught_up:[]};
+    S.clients.forEach(c=>{ const st = clientStatus(c); buckets[st.key].push({c,st}); });
+    const card = (c,st) => {
+      let why = "All caught up";
+      if(st.key==="attention"){ const parts=[]; if(st.overdue) parts.push(`${st.overdue} overdue`); if(st.unlogged) parts.push(`${st.unlogged} need hours logged`); why=parts.join(" · "); }
+      else if(st.key==="active") why = `${st.inProgress} in progress`;
+      else if(st.key==="not_started") why = `${st.count} not started`;
+      return `<div class="panel" data-clientcard="${c.id}">
+        <h3><button type="button" class="clink" data-goto="c:${c.id}" style="color:${c.color}">${esc(c.name)}</button><span>${fmtH(c.hrs||0)}h/wk</span></h3>
+        ${c.staff?`<div class="kv">${esc(c.staff)}</div>`:""}
+        <div class="kv ${st.key==="attention"?"attn":""}">${why}</div>
+        <div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap"><button type="button" class="btn-sm" data-goto="c:${c.id}">Open ${esc(c.name)} →</button><button type="button" class="btn-sm" data-share="${c.id}">Share client view ↗</button></div>
+      </div>`;
+    };
+    const group = (label, key) => {
+      if(!buckets[key].length) return "";
+      return `<div class="statusgroup"><h4 class="dashhead st-${key}">${label}<span>${buckets[key].length}</span></h4>
+        <div class="grid">${buckets[key].map(({c,st})=>card(c,st)).join("")}</div></div>`;
+    };
     m.innerHTML = `<div class="head"><h2>Clients</h2><span class="sub">${S.clients.length} on the books</span></div>
       ${track()}
       <form class="add" id="addclient">
@@ -856,11 +900,10 @@ function renderMain(){
         <input type="number" name="hrs" placeholder="Hours/wk" min="0" step="0.5" style="width:96px">
         <button type="submit">Add client</button>
       </form>
-      <div class="grid">${S.clients.map(c=>`<div class="panel" data-clientcard="${c.id}">
-        <h3><button type="button" class="clink" data-goto="c:${c.id}" style="color:${c.color}">${esc(c.name)}</button><span>${fmtH(c.hrs||0)}h/wk</span></h3>
-        ${c.staff?`<div class="kv">${esc(c.staff)}</div>`:""}
-        <div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap"><button type="button" class="btn-sm" data-goto="c:${c.id}">Open ${esc(c.name)} →</button><button type="button" class="btn-sm" data-share="${c.id}">Share client view ↗</button></div>
-      </div>`).join("")}</div>`;
+      ${group("Needs attention","attention")}
+      ${group("Active","active")}
+      ${group("Not started","not_started")}
+      ${group("Caught up","caught_up")}`;
   } else if(v==="hours"){
     m.innerHTML = `<div class="head"><h2>Hours</h2><span class="sub">${fmtH(entriesInRange().reduce((a,e)=>a+(+e.hours||0),0))} h logged this period</span></div>
       <div class="panel"><h3>Log time</h3>${addTimeForm()}</div>
