@@ -11,6 +11,12 @@
     --route:#1C1D1F; --route-soft:#EDEDEB; --warn:#AA3724; --warn-soft:#F7DED8;
     --ok:#2F6B4F; --ok-soft:#DDE9E2; --tint:#EFEFED;
     --r:6px;
+    /* one small elevation system, used consistently everywhere instead of one-off shadows:
+       -card for static surfaces (panels, rows), -btn/-btn-hover/-btn-active for anything clickable */
+    --shadow-card: 0 1px 2px rgba(23,24,26,.05), 0 2px 6px rgba(23,24,26,.045);
+    --shadow-btn: 0 1px 2px rgba(23,24,26,.09), 0 1px 1px rgba(23,24,26,.05);
+    --shadow-btn-hover: 0 3px 7px rgba(23,24,26,.13), 0 1px 2px rgba(23,24,26,.07);
+    --shadow-btn-active: 0 1px 1px rgba(23,24,26,.06);
     --brandgrad:
       radial-gradient(ellipse 90% 75% at 88% 15%, #7FC0F5 0%, rgba(127,192,245,0) 70%),
       radial-gradient(ellipse 100% 90% at 55% 0%,  #3355E0 0%, rgba(51,85,224,0) 65%),
@@ -358,6 +364,38 @@
     .addlink input[type=text],.addlink input[type=url]{width:100%}
     .addlink button{width:100%;padding:10px}
   }
+  /* ---------- consistent elevation: applied once, everywhere, instead of ad-hoc shadows ---------- */
+  /* every "frame" — panels, rows, cards — gets the same soft lift off the page */
+  .panel, .clienthead, .task, .authcard, .clientcard, .slist, .morelist,
+  .linkslist:not(:empty), .entries .entry, .calcell:not(.empty), .track .bar {
+    box-shadow: var(--shadow-card);
+  }
+  /* every clickable button gets the same small lift, a touch more on hover, and presses
+     flat on click — that press is what actually reads as "not flat" while staying minimal */
+  .btn-sm, .addtaskbtn, .foot button, #mAccountBtn,
+  .authcard button[type=submit], .modalfootright button, #taskDeleteBtn,
+  .addlink button, .add button, #addclient button[type=submit], #addfree button[type=submit],
+  .csubnav .swap button, .showdone, .claimbtn, .calnav button[data-cal] {
+    box-shadow: var(--shadow-btn);
+    transition: box-shadow .1s ease, transform .1s ease;
+  }
+  .btn-sm:hover, .addtaskbtn:hover, .foot button:hover, #mAccountBtn:hover,
+  .authcard button[type=submit]:hover, .modalfootright button:hover, #taskDeleteBtn:hover,
+  .addlink button:hover, .add button:hover, #addclient button[type=submit]:hover, #addfree button[type=submit]:hover,
+  .csubnav .swap button:hover, .claimbtn:hover, .calnav button[data-cal]:hover {
+    box-shadow: var(--shadow-btn-hover);
+  }
+  .btn-sm:active, .addtaskbtn:active, .foot button:active, #mAccountBtn:active,
+  .authcard button[type=submit]:active, .modalfootright button:active, #taskDeleteBtn:active,
+  .addlink button:active, .add button:active, #addclient button[type=submit]:active, #addfree button[type=submit]:active,
+  .csubnav .swap button:active, .showdone:active, .claimbtn:active, .calnav button[data-cal]:active {
+    box-shadow: var(--shadow-btn-active);
+    transform: translateY(1px);
+  }
+  /* chip-style toggles (filters, status/assignee pickers, tab bar) read better as flat-then-
+     pressed, no resting shadow — a shadow on every pill in a crowded row would look noisy */
+  .filters button:active, .tabbar button:active, .assignpicker button:active, .statuspicker button:active { transform: translateY(1px); }
+
   [hidden]{display:none !important}
   @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 
