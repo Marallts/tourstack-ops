@@ -231,20 +231,19 @@
   .calnav button[data-cal]:hover{background:var(--tint)}
   .calnav .lbl{font-weight:600;min-width:130px;text-align:center}
   .calnav .today{margin-left:auto;font-size:12px;color:var(--mute)}
-  .calgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+  .calgrid{display:grid;grid-template-columns:repeat(7,1fr);grid-auto-rows:min-content;gap:4px}
   .calgrid .wd{font-size:11px;color:var(--mute);text-align:center;padding:2px 0 6px}
-  .calcell{min-height:64px;border:1px solid var(--line);border-radius:var(--r);padding:4px;font-size:11px;cursor:pointer;display:flex;flex-direction:column;gap:2px;background:var(--card)}
+  .calcell{height:64px;border:1px solid var(--line);border-radius:var(--r);padding:4px;font-size:11px;cursor:pointer;display:flex;flex-direction:column;gap:3px;background:var(--card);overflow:hidden}
   .calcell:hover{border-color:var(--route)}
   .calcell.empty{border-color:transparent;cursor:default;background:none}
   .calcell.today{border-color:var(--route);box-shadow:inset 0 0 0 1px var(--route)}
   .calcell.sel{background:var(--route-soft);border-color:var(--route)}
   .calcell .dnum{font-size:11px;color:var(--mute);font-weight:600}
   .calcell.today .dnum{color:var(--route)}
-  .calcell .chip{display:flex;align-items:center;gap:3px;overflow:hidden;color:var(--ink)}
-  .calcell .chip .dot{width:6px;height:6px;border-radius:50%;flex:none}
-  .calcell .chip span:last-child{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .calcell .more{color:var(--mute)}
-  @media (max-width:760px){.calcell{min-height:44px;font-size:10px}.calcell .chip span:last-child{display:none}}
+  .caldots{display:flex;flex-wrap:wrap;gap:3px;align-content:flex-start;overflow:hidden}
+  .caldot{width:7px;height:7px;border-radius:50%;flex:none}
+  .calmore{font-size:9px;color:var(--mute);align-self:center}
+  @media (max-width:760px){.calcell{height:44px}}
 
   /* staff */
   .load{margin:6px 0 12px}
@@ -817,10 +816,10 @@ function calGrid(){
     const dayTasks = S.tasks.filter(x=>x.due===ds && !x.done);
     const dnum = +ds.slice(8,10);
     const isToday = ds===td, isSel = ds===S.calDay;
-    const chips = dayTasks.slice(0,3).map(x=>{ const c = client(x.client); return `<div class="chip" title="${esc(x.text)}"><span class="dot" style="background:${c?c.color:"var(--mute)"}"></span><span>${esc(x.text)}</span></div>`; }).join("");
-    const more = dayTasks.length>3? `<div class="more">+${dayTasks.length-3} more</div>` : "";
+    const dots = dayTasks.slice(0,10).map(x=>{ const c = client(x.client); return `<span class="caldot" data-opentask="${x.id}" style="background:${c?c.color:"var(--mute)"}" title="${esc(client(x.client)?.name||"")}: ${esc(x.text)}"></span>`; }).join("");
+    const more = dayTasks.length>10? `<span class="calmore">+${dayTasks.length-10}</span>` : "";
     return `<div class="calcell ${isToday?"today":""} ${isSel?"sel":""}" data-day="${ds}">
-      <div class="dnum">${dnum}</div>${chips}${more}</div>`;
+      <div class="dnum">${dnum}</div><div class="caldots">${dots}${more}</div></div>`;
   }).join("");
   return `<div class="calgrid">${wd}${cellHtml}</div>`;
 }
@@ -1064,6 +1063,7 @@ function bind(){
     else if(act==="clear") S.calDay=null;
     render(); });
   m.querySelectorAll(".calcell[data-day]").forEach(cell=>cell.onclick=()=>{ const d=cell.dataset.day; S.calDay = S.calDay===d? null : d; render(); });
+  m.querySelectorAll("[data-opentask]").forEach(dot=>dot.onclick=e=>{ e.stopPropagation(); openTaskModal({taskId:dot.dataset.opentask}); });
   const pf = m.querySelector("#periodf"); if(pf) pf.querySelectorAll("button").forEach(b=>b.onclick=()=>{S.timeView.mode=b.dataset.mode;render();});
   m.querySelectorAll('.rangepick input[name=start]').forEach(i=>i.onchange=()=>{S.timeView.start=i.value;render();});
   m.querySelectorAll('.rangepick input[name=end]').forEach(i=>i.onchange=()=>{S.timeView.end=i.value;render();});
