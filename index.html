@@ -204,7 +204,7 @@
   .shareview .smeta{color:var(--mute);font-size:14px;margin-bottom:28px}
   .shareview .prog{margin-bottom:32px}
   .shareview .prog .bar{height:10px;background:var(--tint);border-radius:6px;overflow:hidden}
-  .shareview .prog .fill{height:100%}
+  .shareview .prog .fill{height:100%;background:linear-gradient(90deg, #16A34A 0%, #4ADE80 100%)}
   .shareview .prog .lbl{display:flex;justify-content:space-between;font-size:13px;color:var(--mute);margin-top:6px}
   .sgroup{margin-bottom:22px}
   .sgroup h3{font-size:13px;color:var(--mute);font-weight:600;margin:0 0 8px}
@@ -721,7 +721,7 @@ async function renderPublicShare(clientId){
     }).join("");
     $("#shareContent").innerHTML = shareHeader + `<h1>${esc(row.name)}</h1>
       <div class="smeta">Progress overview — live, updated ${fmtLong(today())}</div>
-      <div class="prog"><div class="bar"><div class="fill" style="width:${pct}%;background:${row.color}"></div></div><div class="lbl"><span>${done} of ${total} complete</span><span>${pct}%</span></div></div>
+      <div class="prog"><div class="bar"><div class="fill" style="width:${pct}%"></div></div><div class="lbl"><span>${done} of ${total} complete</span><span>${pct}%</span></div></div>
       ${sections || `<div class="smeta">No tasks yet.</div>`}
       <footer>Shared from TourStack — this page updates automatically.</footer>`;
     $("#loadingScreen").hidden=true; $("#shareScreen").hidden=false;
