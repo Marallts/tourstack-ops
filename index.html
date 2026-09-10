@@ -35,7 +35,7 @@
     .mbrand{display:flex;align-items:center;gap:8px}
     .mtopbar #mAccountBtn{background:none;border:0;color:var(--mute);font-size:20px;line-height:1;padding:2px 8px;border-radius:var(--r)}
     .mtopbar #mAccountBtn:hover{background:var(--tint)}
-    .main{padding-bottom:84px}
+    .main{padding-bottom:100px}
     .tabbar{position:fixed;left:0;right:0;bottom:0;z-index:10;display:flex;background:var(--card);border-top:1px solid var(--line);padding:10px 4px calc(10px + env(safe-area-inset-bottom))}
     .tabbar button{flex:1;display:flex;align-items:center;justify-content:center;background:none;border:0;padding:8px 2px;color:var(--mute);font-size:13px;border-radius:var(--r)}
     .tabbar button.on{color:var(--route);font-weight:600;background:var(--tint)}
@@ -147,9 +147,9 @@
   .statusbadge.st-in_progress{background:#FBEFD9;color:#8A6A1E}
   .statuspicker{display:flex;gap:6px;margin-top:6px}
   .statuspicker button{flex:1;border:1px solid var(--line);border-radius:var(--r);padding:7px 4px;font-size:13px;background:none;color:var(--mute);font-weight:600}
-  .statuspicker button.on.st-not_started{background:var(--tint);color:var(--ink);border-color:var(--line)}
-  .statuspicker button.on.st-in_progress{background:#FBEFD9;color:#8A6A1E;border-color:#FBEFD9}
-  .statuspicker button.on.st-done{background:var(--ok-soft);color:var(--ok);border-color:var(--ok-soft)}
+  .statuspicker button.on.st-not_started{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .statuspicker button.on.st-in_progress{background:#D9A63E;color:#fff;border-color:#D9A63E}
+  .statuspicker button.on.st-done{background:var(--ok);color:#fff;border-color:var(--ok)}
   .task .meta .linkcount{background:var(--tint);border-radius:10px;padding:0 7px}
   .task .meta .logged{color:var(--ok)}
   .task .meta .logged.over{color:var(--warn);font-weight:600}
@@ -345,9 +345,14 @@
   @media (max-width:760px){
     .modalveil{align-items:flex-end;padding:0}
     .modal{max-width:none;width:100%;max-height:88vh;border-radius:16px 16px 0 0}
+    .modalbody{padding:18px 20px}
+    .mlabel{margin-bottom:18px}
     .modalbody .mlabel textarea,.modalbody .mlabel input,.modalbody .mlabel select,.addlink input{font-size:16px}
-    .addlink{flex-wrap:wrap}
+    .mrow{flex-direction:column;gap:18px}
+    .statuspicker button{padding:10px 4px;font-size:14px}
+    .addlink{flex-wrap:wrap;row-gap:8px}
     .addlink input[type=text],.addlink input[type=url]{width:100%}
+    .addlink button{width:100%;padding:10px}
   }
   [hidden]{display:none !important}
   @media (prefers-reduced-motion:reduce){*{transition:none!important}}
@@ -370,6 +375,22 @@
     .rangepick{ flex-wrap:wrap }
     .task .x, .task .logt{ padding:8px }
     .entry .x{ padding:8px }
+  }
+  /* standardised mobile tap targets — every interactive control gets a comfortable,
+     consistent minimum size (~44px), matching iOS/Android touch-target guidelines */
+  @media (max-width:760px){
+    .mtopbar{padding:14px 16px}
+    .mtopbar #mAccountBtn{min-width:44px;min-height:44px;font-size:22px;padding:0;display:flex;align-items:center;justify-content:center}
+    .tabbar button{min-height:48px;font-size:14px}
+    .task .logt{min-width:40px;min-height:40px;display:flex;align-items:center;justify-content:center;padding:0}
+    .task input[type=checkbox]{width:20px;height:20px;margin-top:1px}
+    .csubnav .back{min-height:44px;padding:0;display:flex;align-items:center}
+    .csubnav .swap button{width:44px;height:44px;font-size:18px}
+    .filters button{padding:8px 14px;font-size:14px;min-height:38px}
+    .btn-sm{padding:9px 14px;font-size:13px;min-height:38px}
+    .stghead,.dashhead{min-height:46px;padding:12px 2px}
+    .addtaskbtn{min-height:46px;padding:12px 14px}
+    .statusbadge{padding:4px 9px;font-size:12.5px}
   }
   /* auth / identity */
   #loadingScreen{display:flex;align-items:center;justify-content:center;height:100vh;background:var(--brandgrad)}
