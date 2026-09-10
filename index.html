@@ -28,9 +28,9 @@
   .app{display:grid;grid-template-columns:230px 1fr;min-height:100vh}
   .mtopbar{display:none}
   @media (max-width:760px){
-    .app{grid-template-columns:1fr}
+    .app{grid-template-columns:1fr;grid-template-rows:auto 1fr}
     .rail{display:none !important}
-    .mtopbar{display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:8;background:var(--brandgrad);padding:12px 16px;font-weight:600;
+    .mtopbar{display:flex;align-items:center;justify-content:space-between;align-self:start;position:sticky;top:0;z-index:8;background:var(--brandgrad);padding:12px 16px;font-weight:600;
       color:#fff; --ink:#fff; --mute:rgba(255,255,255,.75); --tint:rgba(255,255,255,.16);}
     .mbrand{display:flex;align-items:center;gap:8px}
     .mtopbar #mAccountBtn{background:none;border:0;color:var(--mute);font-size:20px;line-height:1;padding:2px 8px;border-radius:var(--r)}
@@ -127,9 +127,11 @@
   .add .fld{display:flex;align-items:center;gap:4px;font-size:12px;color:var(--mute)}
   .add button{background:var(--route);color:#fff;border:0;border-radius:var(--r);padding:8px 14px;font-weight:600}
   .add button:hover{filter:brightness(.95)}
-  .tasks{list-style:none;margin:0;padding:0}
-  .task{display:grid;grid-template-columns:20px 1fr auto;gap:10px;align-items:start;padding:8px 0;border-top:1px solid var(--line)}
-  .task:first-child{border-top:0}
+  .tasks{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:5px}
+  .task{display:grid;grid-template-columns:20px 1fr auto;gap:10px;align-items:start;padding:10px 12px;border-radius:var(--r)}
+  .task.st-not_started{background:var(--tint)}
+  .task.st-in_progress{background:#FBEFD9}
+  .task.st-done{background:var(--ok-soft)}
   .task input[type=checkbox]{margin:3px 0 0;accent-color:var(--ok);width:16px;height:16px}
   .task .t{display:flex;flex-direction:column;gap:2px}
   .task .t .txt{outline:none}
@@ -205,6 +207,9 @@
   .sghead.st-done::before{background:var(--ok)}
   .sghead span{color:var(--mute);font-weight:400}
   .slist{list-style:none;margin:0;padding:0;background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+  .sgroup.st-not_started .slist{background:var(--tint)}
+  .sgroup.st-in_progress .slist{background:#FBEFD9}
+  .sgroup.st-done .slist{background:var(--ok-soft)}
   .srow{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 14px;border-top:1px solid var(--line)}
   .srow:first-child{border-top:0}
   .srow .stxt{font-size:14px}
@@ -574,6 +579,21 @@ async function addClientRow(name,hrs){
   if(error) return toast("Error: "+error.message);
   upsert(S.clients, data); render(); renderNav(); toast("Added");
 }
+async function deleteClientRow(cid){
+  const c = client(cid); if(!c) return;
+  const taskCount = S.tasks.filter(x=>x.client===cid).length;
+  const hoursCount = S.timeEntries.filter(e=>e.client===cid).length;
+  const warning = `Delete ${c.name}? This permanently deletes the client, all ${taskCount} of their tasks, and all ${hoursCount} logged time entries for them. This can't be undone.`;
+  if(!confirm(warning)) return;
+  const {error} = await sb.from("clients").delete().eq("id",cid);
+  if(error) return toast("Error: "+error.message);
+  S.clients = S.clients.filter(z=>z.id!==cid);
+  S.tasks = S.tasks.filter(x=>x.client!==cid);
+  S.timeEntries = S.timeEntries.filter(e=>e.client!==cid);
+  S.view = "clients";
+  render(); renderNav();
+  toast("Deleted "+c.name);
+}
 async function addPerson(row){
   const {data,error} = await sb.from("people").insert(row).select().single();
   if(error){ toast("Error: "+error.message); return null; }
@@ -650,14 +670,14 @@ async function renderPublicShare(clientId){
     }
     $("#shareScreen").style.setProperty("--sharecolor", row.color);
     const parsed = (tasks||[]).map(t=>({ text:t.text, statusKey:t.status||"not_started", status:STATUS_LABELS[t.status||"not_started"]||"Not started", due:t.due }));
-    const order = [["not_started","Not started"],["in_progress","In progress"],["done","Done"]];
+    const order = [["done","Done"],["in_progress","In progress"],["not_started","Not started"]];
     const total=parsed.length, done=parsed.filter(p=>p.statusKey==="done").length;
     const pct = total? Math.round(done/total*100) : 0;
     const sections = order.map(([key,label])=>{
       const rows = parsed.filter(p=>p.statusKey===key);
       if(!rows.length) return "";
       const rowsHtml = rows.map(p=>`<li class="srow"><span class="stxt">${esc(p.text)}</span>${p.due?`<span class="sdue">${fmtLong(p.due)}</span>`:""}</li>`).join("");
-      return `<div class="sgroup"><h3 class="sghead st-${key}">${label}<span>${rows.length}</span></h3><ul class="slist">${rowsHtml}</ul></div>`;
+      return `<div class="sgroup st-${key}"><h3 class="sghead st-${key}">${label}<span>${rows.length}</span></h3><ul class="slist">${rowsHtml}</ul></div>`;
     }).join("");
     $("#shareContent").innerHTML = shareHeader + `<h1>${esc(row.name)}</h1>
       <div class="smeta">Progress overview — live, updated ${fmtLong(today())}</div>
@@ -810,7 +830,7 @@ function taskList(list, opts={}){
   let items = list.filter(x=> f==="all" || (x.assignees||[]).includes(f));
   const needsLog = x => x.done && !loggedFor(x.id);
   const row = x => { const logged = loggedFor(x.id); const assignees = x.assignees||[]; const links = x.links||[];
-    return `<li class="task ${x.done?"done":""}" data-id="${x.id}">
+    return `<li class="task st-${x.status||"not_started"} ${x.done?"done":""}" data-id="${x.id}">
     <input type="checkbox" ${x.done?"checked":""} aria-label="Done">
     <div class="t">
       <div class="tmain" data-open="${x.id}">
@@ -837,9 +857,9 @@ function taskList(list, opts={}){
       ${open?`<ul class="tasks">${rows.map(row).join("")}</ul>`:""}
     </div>`;
   };
-  return group("Not started","not_started",notStarted)
+  return group("Done","done",doneItems)
     + group("In progress","in_progress",inProgress)
-    + group("Done","done",doneItems);
+    + group("Not started","not_started",notStarted);
 }
 const filters = () => `<div class="filters">${["all",...PEOPLE()].map(p=>`<button class="${S.filter===p?"on":""}" data-f="${p}">${p==="all"?"Everyone":p}</button>`).join("")}</div>`;
 const addTaskBtn = (cid, due) => `<button type="button" class="addtaskbtn" data-addtask="1" data-client="${cid||""}" data-due="${due||""}">+ Add task</button>`;
@@ -1007,6 +1027,7 @@ function renderMain(){
           <label class="chfield">Staff support<input data-f="staff" value="${esc(c.staff)}" placeholder="—"></label>
           <label class="chfield">Contact<input data-f="contact" value="${esc(c.contact)}" placeholder="Name, email"></label>
           <button type="button" class="btn-sm" data-share="${c.id}">Copy share link 🔗</button>
+          <button type="button" class="btn-sm danger" data-delclient="${c.id}">Delete client</button>
         </div>
         <textarea class="chnotes" data-f="notes" placeholder="Notes — anything worth remembering">${esc(c.notes)}</textarea>
       </div>
@@ -1064,6 +1085,7 @@ function bind(){
     addClientRow(d.get("name").trim(), +d.get("hrs")||0); };
   m.querySelectorAll("[data-goto]").forEach(b=>b.onclick=()=>{S.view=b.dataset.goto;render();});
   m.querySelectorAll("[data-share]").forEach(b=>b.onclick=()=>copyShareLink(b.dataset.share));
+  m.querySelectorAll("[data-delclient]").forEach(b=>b.onclick=()=>deleteClientRow(b.dataset.delclient));
   const moreExport=m.querySelector("#moreExport"); if(moreExport) moreExport.onclick=doExport;
   const moreSignout=m.querySelector("#moreSignout"); if(moreSignout) moreSignout.onclick=doSignOut;
   const swapClient=dir=>{ if(!S.view.startsWith("c:")) return; const idx=S.clients.findIndex(z=>z.id===S.view.slice(2));
