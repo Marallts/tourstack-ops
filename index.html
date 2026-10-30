@@ -14,7 +14,7 @@
     --route:#1C1D1F; --route-soft:#EDEDEB; --warn:#B03A26; --warn-soft:#F9E3DD;
     --ok:#2F6B4F; --ok-soft:#E1EDE6; --tint:#F0F0EE; --prog:#C98F1E; --prog-soft:#FBF0DA;
     --focus:#3355E0;
-    --r:8px; --r-lg:12px;
+    --r:10px; --r-lg:18px;
     /* one small elevation system, used consistently everywhere instead of one-off shadows:
        -card for static surfaces (panels, rows), -btn/-btn-hover/-btn-active for anything clickable */
     --shadow-card: 0 1px 2px rgba(23,24,26,.05), 0 2px 6px rgba(23,24,26,.045);
@@ -38,7 +38,7 @@
   .ic{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;vertical-align:-3px}
   .ic.sm{width:13px;height:13px;stroke-width:2;vertical-align:-2px}
   /* figures line up in columns wherever numbers are compared */
-  .num,.cnt,.hourstbl,.track,.meta,.calnav,.load,.entry,.kv{font-variant-numeric:tabular-nums}
+  .num,.cnt,.hourstbl,.meta,.calnav,.load,.entry,.kv{font-variant-numeric:tabular-nums}
   :focus-visible{outline:2px solid var(--focus);outline-offset:2px}
   .rail :focus-visible,.mtopbar :focus-visible{outline-color:#fff}
 
@@ -73,7 +73,6 @@
   .nav button:hover{background:var(--tint)}
   .nav button.on{background:var(--route-soft);color:var(--route);font-weight:600}
   .nav button.on .ic{opacity:1}
-  .nav .cdot{width:8px;height:8px;margin:0 1px;box-shadow:0 0 0 1px rgba(255,255,255,.9)}
   .nav .navsection{margin-top:14px}
   .nav button.sub{font-size:13.5px;font-weight:500;padding:5px 10px 5px 36px;gap:9px;color:var(--mute)}
   .nav button.sub:hover{color:var(--ink)}
@@ -111,21 +110,12 @@
   }
 
   /* the "More" menu screen (mobile) */
-  .morelist{list-style:none;margin:0;padding:0;background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+  .morelist{list-style:none;margin:0;padding:0;background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden}
   .morelist li{border-top:1px solid var(--line)}
   .morelist li:first-child{border-top:0}
   .morelist button{width:100%;text-align:left;background:none;border:0;padding:14px 16px;font-size:15px;display:flex;justify-content:space-between;align-items:center}
   .morelist button .cnt{font-size:12px;color:var(--mute);background:var(--tint);border-radius:10px;padding:1px 7px}
   .morewho{color:var(--mute);font-size:13px;padding:0 2px 10px}
-
-  /* the 50-hour track — the one memorable element */
-  .track{margin:6px 0 26px}
-  .track .bar{position:relative;height:36px;background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden;display:flex}
-  .track .seg{height:100%;display:flex;align-items:center;padding:0 10px;font-size:12.5px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;border-right:2px solid #fff}
-  .track .seg.thin{padding:0}
-  .track .cap{position:absolute;top:0;bottom:0;width:2px;background:var(--ink)}
-  .track .legend{display:flex;justify-content:space-between;color:var(--mute);font-size:13px;margin-top:6px}
-  .track .over{color:var(--warn);font-weight:600}
 
   .grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start}
   @media (max-width:760px){.grid{grid-template-columns:1fr}}
@@ -140,8 +130,6 @@
   .personhead > span:last-child{margin-left:auto;font-size:13px}
   .avatar{width:28px;height:28px;border-radius:50%;background:var(--ink);color:#fff!important;font-size:13px;font-weight:600!important;display:inline-flex;align-items:center;justify-content:center;flex:none}
   .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
-  .cdot{display:inline-block;width:9px;height:9px;border-radius:50%;flex:none}
-  .cdot.big{width:12px;height:12px;margin-right:12px;vertical-align:4px}
   /* people filter + sort, on one line */
   .listtools{display:flex;align-items:flex-start;gap:8px 12px;flex-wrap:wrap;margin-bottom:14px}
   .listtools .filters{margin-bottom:0;flex:1 1 max-content;min-width:0}
@@ -191,18 +179,22 @@
   .task:first-child{border-top:0}
   .task:hover{background:#FAFAF8}
   .task.pri::before{content:"";position:absolute;left:0;top:10px;bottom:10px;width:3px;border-radius:0 3px 3px 0;background:var(--warn)}
-  .task input[type=checkbox]{appearance:none;-webkit-appearance:none;margin:2px 0 0;width:18px;height:18px;border:1.5px solid var(--line-strong);border-radius:5px;background:#fff center/12px no-repeat;cursor:pointer;transition:background-color .12s,border-color .12s}
+  .task input[type=checkbox]{appearance:none;-webkit-appearance:none;margin:2px 0 0;width:18px;height:18px;border:1.5px solid var(--line-strong);border-radius:6px;background:#fff center/12px no-repeat;cursor:pointer;transition:background-color .12s,border-color .12s}
   .task input[type=checkbox]:hover{border-color:var(--ok)}
   .task input[type=checkbox]:checked{background-color:var(--ok);border-color:var(--ok);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7'/%3E%3C/svg%3E")}
   .task .t{display:flex;flex-direction:column;gap:5px;min-width:0}
   .task .tmain{display:flex;flex-direction:column;gap:5px}
   .task .t .txt{outline:none;font-size:15px;font-weight:500;line-height:1.4;color:var(--ink);overflow-wrap:anywhere}
   .task .t .txt .ic{color:var(--warn);margin-right:5px;vertical-align:-2px}
+  .task .tnote{display:flex;gap:6px;align-items:baseline;font-size:13.5px;color:var(--mute);min-width:0}
+  .task .tnote .ic{color:var(--faint);flex:none;align-self:center}
+  .task .tnote span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+  .task .meta .subcount.alldone{color:var(--ok);font-weight:600}
+  .task .meta .subcount.alldone .ic{color:var(--ok)}
   .task .meta{display:flex;gap:4px 14px;font-size:13px;color:var(--mute);flex-wrap:wrap;align-items:center;line-height:1.35}
   .task .meta > span{display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
   .task .meta .ic{color:var(--faint)}
   .task .meta .cl{font-weight:600;color:var(--ink)}
-  .task .meta .cl i{width:8px;height:8px;border-radius:50%;flex:none}
   .task .meta .due.late{color:var(--warn);font-weight:600}
   .task .meta .due.late .ic{color:var(--warn)}
   .task .meta .hrs.over{color:var(--warn);font-weight:600}
@@ -247,7 +239,7 @@
 
   /* client status dashboard headers — same dot language as task groups, but static (no collapse) */
   .dashhead{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;color:var(--ink);margin:0;padding:22px 2px 10px}
-  .statusgroup:first-child .dashhead,.track + .add + .statusgroup .dashhead{padding-top:6px}
+  .add + .statusgroup .dashhead{padding-top:8px}
   .dashhead::before{content:"";width:9px;height:9px;border-radius:50%;flex:none}
   .dashhead.st-attention::before{background:var(--warn)}
   .dashhead.st-active::before{background:var(--prog)}
@@ -257,13 +249,13 @@
 
   /* public client share page (unauthenticated, read-only) */
   .shareview{background:var(--brandgrad);min-height:100vh;display:flex;justify-content:center;padding:44px 20px}
-  .shareview .wrap{max-width:640px;width:100%;margin:0;padding:36px 32px 44px;background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:0 24px 60px rgba(0,0,0,.18);align-self:flex-start}
+  .shareview .wrap{max-width:640px;width:100%;margin:0;padding:36px 32px 44px;background:var(--card);border:1px solid var(--line);border-radius:24px;box-shadow:0 24px 60px rgba(0,0,0,.18);align-self:flex-start}
   .sharebrand{display:flex;align-items:center;gap:7px;color:var(--mute);font-size:13px;font-weight:600;margin-bottom:22px}
   .sharebrand .brandmark{width:16px;height:16px;color:var(--mute)}
   .shareview h1{font-size:24px;font-weight:600;margin:0 0 4px;letter-spacing:-.02em}
   .shareview .smeta{color:var(--mute);font-size:14px;margin-bottom:28px}
   .shareview .prog{margin-bottom:32px}
-  .shareview .prog .bar{height:10px;background:var(--tint);border-radius:6px;overflow:hidden}
+  .shareview .prog .bar{height:10px;background:var(--tint);border-radius:999px;overflow:hidden}
   .shareview .prog .fill{height:100%;background:linear-gradient(90deg, #16A34A 0%, #4ADE80 100%)}
   .shareview .prog .lbl{display:flex;justify-content:space-between;font-size:13px;color:var(--mute);margin-top:6px}
   .sgroup{margin-bottom:22px}
@@ -274,7 +266,7 @@
   .sghead.st-in_progress::before{background:#D9A63E}
   .sghead.st-done::before{background:var(--ok)}
   .sghead span{color:var(--mute);font-weight:400}
-  .slist{list-style:none;margin:0;padding:0;background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+  .slist{list-style:none;margin:0;padding:0;background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden}
   .sgroup.st-not_started .slist{background:var(--tint)}
   .sgroup.st-in_progress .slist{background:#FBEFD9}
   .sgroup.st-done .slist{background:var(--ok-soft)}
@@ -290,7 +282,7 @@
   .shareview footer{margin-top:30px;font-size:12px;color:var(--mute)}
   @media (max-width:760px){
     .shareview{padding:0}
-    .shareview .wrap{border-radius:18px 18px 0 0;border:0;margin-top:28px;min-height:calc(100vh - 28px);padding:28px 20px 44px}
+    .shareview .wrap{border-radius:24px 24px 0 0;border:0;margin-top:28px;min-height:calc(100vh - 28px);padding:28px 20px 44px}
   }
 
   /* calendar */
@@ -302,14 +294,15 @@
   .calnav .today{margin-left:6px;font-size:13px;font-weight:500}
   .calgrid{display:grid;grid-template-columns:repeat(7,1fr);grid-auto-rows:min-content;gap:4px}
   .calgrid .wd{font-size:12px;font-weight:600;color:var(--faint);text-align:center;padding:2px 0 6px}
-  .calcell{height:64px;border:1px solid var(--line);border-radius:var(--r);padding:5px;font-size:11px;cursor:pointer;display:flex;flex-direction:column;gap:4px;background:var(--card);overflow:hidden;transition:border-color .12s}
+  .calcell{height:64px;border:1px solid var(--line);border-radius:12px;padding:5px;font-size:11px;cursor:pointer;display:flex;flex-direction:column;gap:4px;background:var(--card);overflow:hidden;transition:border-color .12s}
   .calcell:hover{border-color:var(--faint)}
   .calcell.empty{border-color:transparent;cursor:default;background:none}
   .calcell.sel{background:var(--paper);border-color:var(--ink)}
   .calcell .dnum{font-size:12px;color:var(--mute);font-weight:600;width:22px;height:22px;display:flex;align-items:center;justify-content:center;border-radius:50%;margin:-2px 0 0 -2px}
   .calcell.today .dnum{color:#fff;background:var(--ink)}
   .caldots{display:flex;flex-wrap:wrap;gap:3px;align-content:flex-start;overflow:hidden}
-  .caldot{width:7px;height:7px;border-radius:50%;flex:none}
+  .caldot{width:7px;height:7px;border-radius:50%;flex:none;background:var(--ink);cursor:pointer}
+  .calcell.today .caldot{background:var(--ink)}
   .calmore{font-size:9px;color:var(--mute);align-self:center}
   @media (max-width:760px){.calcell{height:44px}}
 
@@ -368,11 +361,10 @@
   .kv{font-size:13px;color:var(--mute)}
   .kv b{color:var(--ink);font-weight:600}
   .kv.attn{color:var(--warn);font-weight:600}
-  .clientcard{display:flex;flex-direction:column;gap:4px;position:relative;overflow:hidden}
-  .clientcard::before{content:"";position:absolute;left:0;right:0;top:0;height:3px;background:var(--cc,var(--line))}
+  .clientcard{display:flex;flex-direction:column;gap:4px}
+  .clientcard h3 .clink{font-size:16px}
   .clientcard h3{margin-bottom:6px}
   .clientcard h3 > span{margin-left:auto;font-size:13px}
-  .clientcard .cdot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:8px;flex:none}
   .clientcard .kv{font-size:14px}
   .clientcard .cardbtns{margin-top:12px;display:flex;gap:6px;flex-wrap:wrap}
   .clink{display:inline-flex;align-items:center;background:none;border:0;padding:0;font:inherit;font-weight:600;cursor:pointer;color:var(--ink);text-align:left}
@@ -383,7 +375,7 @@
   .addtaskbtn:hover{border-color:var(--ink);color:var(--ink)}
   .task .tmain{cursor:pointer}
   .modalveil{position:fixed;inset:0;z-index:20;background:rgba(23,24,26,.45);display:flex;align-items:center;justify-content:center;padding:20px}
-  .modal{background:var(--card);border-radius:14px;width:100%;max-width:480px;max-height:86vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+  .modal{background:var(--card);border-radius:22px;width:100%;max-width:480px;max-height:86vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.25)}
   .modalhead{display:flex;align-items:center;justify-content:space-between;padding:14px 18px 14px 20px;border-bottom:1px solid var(--line);flex:none}
   .modalhead h3{margin:0;font-size:17px;font-weight:700;letter-spacing:-.01em}
   .modalx{display:flex;align-items:center;justify-content:center;width:34px;height:34px;background:none;border:0;color:var(--mute);border-radius:var(--r)}
@@ -407,6 +399,24 @@
   .linkslist .linkrow a{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--route)}
   .linkslist .linkrow .ic{color:var(--faint)}
   .linkslist .linkrow button{display:flex;align-items:center;background:none;border:0;color:var(--mute);padding:4px;border-radius:var(--r);flex:none}
+  /* subtasks in the task form */
+  .subprog{float:right;font-weight:500;color:var(--faint)}
+  .subtasklist{list-style:none;margin:6px 0 0;padding:0}
+  .subtasklist:not(:empty){border:1px solid var(--line);border-radius:var(--r);overflow:hidden;margin-bottom:8px}
+  .subrow{display:flex;align-items:center;gap:8px;padding:4px 6px 4px 10px;border-top:1px solid var(--line);background:#fff}
+  .subrow:first-child{border-top:0}
+  .subrow input[type=checkbox]{width:17px;height:17px;margin:0;accent-color:var(--ok);flex:none}
+  .subrow input[type=text]{flex:1;min-width:0;border:1px solid transparent;border-radius:8px;padding:6px 6px;font-size:14px;font-weight:400;color:var(--ink);background:none}
+  .subrow input[type=text]:hover{border-color:var(--line)}
+  .subrow input[type=text]:focus{border-color:var(--line-strong);outline:none}
+  .subrow.done input[type=text]{text-decoration:line-through;color:var(--mute)}
+  .subrow button{display:flex;align-items:center;background:none;border:0;color:var(--faint);padding:6px;border-radius:8px;flex:none}
+  .subrow button:hover{color:var(--warn);background:var(--warn-soft)}
+  .addsub{display:flex;gap:6px;margin-top:6px}
+  .addsub input{flex:1;min-width:0;border:1px solid var(--line-strong);border-radius:var(--r);padding:8px 10px;font-size:14px;background:#fff;font-weight:400}
+  .addsub input:focus{border-color:var(--ink);outline:none}
+  .addsub button{background:var(--tint);border:0;border-radius:var(--r);padding:8px 14px;font-size:13px;font-weight:600;flex:none}
+  .addsub button:hover{background:var(--route-soft)}
   .addlink{display:flex;gap:6px;margin-top:6px}
   .addlink input{border:1px solid var(--line-strong);border-radius:var(--r);padding:8px 10px;font-size:14px;background:#fff;font-weight:400}
   .addlink input[type=text]{width:38%}
@@ -419,10 +429,10 @@
   #taskDeleteBtn{display:inline-flex;align-items:center;gap:6px;background:none;border:1px solid var(--line-strong);border-radius:var(--r);padding:9px 14px;font-size:14px;color:var(--warn)}
   @media (max-width:760px){
     .modalveil{align-items:flex-end;padding:0}
-    .modal{max-width:none;width:100%;max-height:88vh;border-radius:16px 16px 0 0}
+    .modal{max-width:none;width:100%;max-height:90vh;border-radius:22px 22px 0 0}
     .modalbody{padding:18px 20px}
     .mlabel{margin-bottom:18px}
-    .modalbody .mlabel textarea,.modalbody .mlabel input,.modalbody .mlabel select,.addlink input{font-size:16px}
+    .modalbody .mlabel textarea,.modalbody .mlabel input,.modalbody .mlabel select,.addlink input,.addsub input,.subrow input[type=text]{font-size:16px}
     .mrow{flex-direction:column;gap:18px}
     .statuspicker button{padding:10px 4px;font-size:14px}
     .addlink{flex-wrap:wrap;row-gap:8px}
@@ -431,7 +441,7 @@
   }
   /* ---------- consistent elevation: applied once, everywhere, instead of ad-hoc shadows ---------- */
   /* every "frame" — panels, rows, cards — gets the same soft lift off the page */
-  .panel, .clienthead, .tasks, .authcard, .slist, .morelist, .track .bar {
+  .panel, .clienthead, .tasks, .authcard, .slist, .morelist {
     box-shadow: var(--shadow-card);
   }
   /* every clickable button gets the same small lift, a touch more on hover, and presses
@@ -505,7 +515,7 @@
   #loadingScreen{display:flex;align-items:center;justify-content:center;height:100vh;background:var(--brandgrad)}
   #loadingScreen .brandmark{width:36px;height:36px;color:#fff;opacity:.9}
   .authwrap{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px;background:var(--brandgrad)}
-  .authcard{width:100%;max-width:340px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:28px}
+  .authcard{width:100%;max-width:340px;background:var(--card);border:1px solid var(--line);border-radius:22px;padding:30px}
   .authcard h1{font-size:16px;font-weight:600;margin:0 0 20px;display:flex;align-items:baseline;gap:6px}
   .authcard h1 small{font-size:12px;color:var(--mute);font-weight:400}
   .authcard form{display:flex;flex-direction:column;gap:8px}
@@ -541,6 +551,8 @@
   <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v11M7.5 10.5L12 15l4.5-4.5M5 20h14"/></symbol>
   <symbol id="i-signout" viewBox="0 0 24 24"><path d="M14 4.5h4.5v15H14M9.5 8l-4 4 4 4M5.5 12H15"/></symbol>
   <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="9" r="3.5"/><circle cx="12" cy="12" r="9"/><path d="M6.2 18.7c1.2-2.3 3.3-3.4 5.8-3.4s4.6 1.1 5.8 3.4"/></symbol>
+  <symbol id="i-checklist" viewBox="0 0 24 24"><path d="M4 7l2 2 3.5-3.5M4 15.5l2 2 3.5-3.5M12.5 8h7.5M12.5 16.5h7.5"/></symbol>
+  <symbol id="i-note" viewBox="0 0 24 24"><path d="M6 3.5h8.5L19 8v12.5H6z"/><path d="M14 3.5V8.5h5M9 13h7M9 16.5h5"/></symbol>
   <symbol id="i-sort" viewBox="0 0 24 24"><path d="M7 4.5v15M3.5 16L7 19.5 10.5 16M14 7h6.5M14 12h4.5M14 17h2.5"/></symbol>
 </svg>
 <div id="loadingScreen"><svg class="brandmark" viewBox="0 0 32 32" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M2 2 H24 L30 8 H8 Z"/><path d="M6 13 H20 L26 19 H12 Z"/><path d="M10 24 H16 L22 30 H16 Z"/></svg></div>
@@ -602,6 +614,14 @@
     <div class="modalbody">
       <form id="taskForm">
         <label class="mlabel">Task<textarea name="text" rows="2" required placeholder="What needs doing?"></textarea></label>
+        <label class="mlabel">Notes<textarea name="notes" rows="3" placeholder="Optional: context, decisions, anything useful"></textarea></label>
+        <div class="mlabel">Subtasks<span class="subprog" id="subtaskProgress"></span>
+          <ul class="subtasklist" id="subtaskList"></ul>
+          <div class="addsub">
+            <input type="text" id="subtaskInput" placeholder="Add a subtask (optional)" autocomplete="off">
+            <button type="button" id="addSubtaskBtn">Add</button>
+          </div>
+        </div>
         <div class="mlabel">Status<div class="statuspicker" id="statusPicker"></div></div>
         <label class="mlabel" id="taskClientWrap" hidden>Client<select name="client" id="taskClientSelect"></select></label>
         <div class="mlabel">Assignees<div class="assignpicker" id="assignPicker"></div></div>
@@ -655,7 +675,7 @@ let ME = null; // this browser's `people` row, once identity is claimed
 const $ = s => document.querySelector(s);
 
 /* ---------- row <-> app-model mapping (DB columns differ slightly from the old local shape) ---------- */
-const mapTask = r => ({id:r.id, client:r.client_id, text:r.text, assignees:r.assignees||[], due:r.due||"", done:r.done, status:r.status||"not_started", pri:r.pri, est:r.est, links:r.links||[]});
+const mapTask = r => ({id:r.id, client:r.client_id, text:r.text, assignees:r.assignees||[], due:r.due||"", done:r.done, status:r.status||"not_started", pri:r.pri, est:r.est, links:r.links||[], notes:r.notes||"", subtasks:Array.isArray(r.subtasks)? r.subtasks : []});
 const mapEntry = r => ({id:r.id, client:r.client_id, taskId:r.task_id, who:r.who, date:r.date, hours:+r.hours, text:r.text||""});
 
 /* ---------- storage: Supabase, shared across the team ---------- */
@@ -677,17 +697,22 @@ async function loadData(){
 // fire-and-forget persist for optimistic local edits — UI already updated, this just syncs
 function persist(promise){ promise.then(({error})=>{ if(error) toast("Sync error: "+error.message); }); }
 
+// Notes and subtasks live in two newer columns (tasks.notes, tasks.subtasks). If the database
+// hasn't been given them yet, the task still saves without them and says so.
+const MISSING_EXTRAS = /'?(notes|subtasks)'? column|column .*(notes|subtasks)/i;
 async function saveTask(payload, id){
-  if(id){
-    const {data,error} = await sb.from("tasks").update(payload).eq("id",id).select().single();
-    if(error) return toast("Error: "+error.message);
-    const x=S.tasks.find(z=>z.id===id); if(x) Object.assign(x, mapTask(data));
-    render(); toast("Saved");
-  } else {
-    const {data,error} = await sb.from("tasks").insert(payload).select().single();
-    if(error) return toast("Error: "+error.message);
-    upsertFront(S.tasks, mapTask(data)); render(); toast("Added");
+  const write = p => id ? sb.from("tasks").update(p).eq("id",id).select().single()
+                        : sb.from("tasks").insert(p).select().single();
+  let {data,error} = await write(payload), dropped = false;
+  if(error && MISSING_EXTRAS.test(error.message||"")){
+    const {notes, subtasks, ...rest} = payload; dropped = !!(notes || (subtasks||[]).length);
+    ({data,error} = await write(rest));
   }
+  if(error) return toast("Error: "+error.message);
+  if(id){ const x=S.tasks.find(z=>z.id===id); if(x) Object.assign(x, mapTask(data)); }
+  else upsertFront(S.tasks, mapTask(data));
+  render();
+  toast(dropped ? "Saved without notes and subtasks: the database needs its update first" : (id ? "Saved" : "Added"));
 }
 async function deleteTask(id){
   S.tasks=S.tasks.filter(z=>z.id!==id); render(); toast("Deleted");
@@ -887,7 +912,7 @@ function renderNav(){
   b("Hours","hours",null,icon("clock"));
   // Clients is a full-size section like the others; each client sits under it as a smaller, indented sub-item
   b("Clients","clients",null,icon("clients"),"navsection");
-  S.clients.forEach(c=>b(c.name,"c:"+c.id,open().filter(x=>x.client===c.id).length,`<i class="cdot" style="background:${c.color}"></i>`,"sub"));
+  S.clients.forEach(c=>b(c.name,"c:"+c.id,open().filter(x=>x.client===c.id).length,"","sub"));
   renderTabbar();
 }
 
@@ -909,16 +934,6 @@ function renderTabbar(){
     el.onclick=()=>{S.view=tb.view;render();};
     t.appendChild(el);
   });
-}
-
-function track(){
-  const total = S.clients.reduce((a,c)=>a+(+c.hrs||0),0);
-  const cap = S.cap; const span = Math.max(total,cap);
-  const segs = S.clients.filter(c=>c.hrs>0).map(c=>{ const w=(c.hrs/span)*100; return `<div class="seg ${w<7?"thin":""}" style="width:${w}%;background:${c.color}" title="${esc(c.name)} — ${c.hrs}h">${w>=7?esc(c.name.split(" ")[0])+" "+c.hrs:""}</div>`; }).join("");
-  const capPos = (cap/span)*100;
-  const over = total>cap;
-  return `<div class="track"><div class="bar">${segs}<div class="cap" style="left:calc(${capPos}% - 1px)"></div></div>
-    <div class="legend"><span>${total} h planned</span><span class="${over?"over":""}">${over?`${total-cap} h over the ${cap} h cap`:`${cap-total} h free under the ${cap} h cap`}</span></div></div>`;
 }
 
 /* ---------- calendar ---------- */
@@ -950,7 +965,7 @@ function calGrid(){
     const dayTasks = S.tasks.filter(x=>x.due===ds && !x.done);
     const dnum = +ds.slice(8,10);
     const isToday = ds===td, isSel = ds===S.calDay;
-    const dots = dayTasks.slice(0,10).map(x=>{ const c = client(x.client); return `<span class="caldot" data-opentask="${x.id}" style="background:${c?c.color:"var(--mute)"}" title="${esc(client(x.client)?.name||"")}: ${esc(x.text)}"></span>`; }).join("");
+    const dots = dayTasks.slice(0,10).map(x=>{ const c = client(x.client); return `<span class="caldot" data-opentask="${x.id}" title="${esc(client(x.client)?.name||"")}: ${esc(x.text)}"></span>`; }).join("");
     const more = dayTasks.length>10? `<span class="calmore">+${dayTasks.length-10}</span>` : "";
     return `<div class="calcell ${isToday?"today":""} ${isSel?"sel":""}" data-day="${ds}">
       <div class="dnum">${dnum}</div><div class="caldots">${dots}${more}</div></div>`;
@@ -974,13 +989,15 @@ function taskList(list, opts={}){
   const needsLog = x => x.done && !loggedFor(x.id);
   const row = x => { const logged = loggedFor(x.id); const assignees = x.assignees||[]; const links = x.links||[];
     const st = x.status||"not_started", c = client(x.client), late = !x.done && x.due && x.due<today();
+    const subs = x.subtasks||[], subsDone = subs.filter(z=>z.done).length;
     const hrs = x.est && logged ? `${fmtH(logged)} of ${fmtH(x.est)}h` : x.est ? `${fmtH(x.est)}h est.` : logged ? `${fmtH(logged)}h logged` : "";
     const over = x.est && logged > x.est;
     const meta = [
-      opts.showClient && c ? `<span class="cl"><i style="background:${c.color}"></i>${esc(c.name)}</span>` : "",
+      opts.showClient && c ? `<span class="cl">${esc(c.name)}</span>` : "",
       x.due ? `<span class="due ${late?"late":""}" ${late?`title="Overdue"`:""}>${icon("cal","sm")}${fmtDue(x.due)}</span>` : "",
       assignees.length ? `<span class="who">${icon("person","sm")}${assignees.map(esc).join(", ")}</span>` : "",
       hrs ? `<span class="hrs ${over?"over":""}" ${over?`title="More hours logged than estimated"`:""}>${icon("clock","sm")}${hrs}</span>` : "",
+      subs.length ? `<span class="subcount ${subsDone===subs.length?"alldone":""}" title="${subsDone} of ${subs.length} subtasks done">${icon("checklist","sm")}${subsDone}/${subs.length}</span>` : "",
       links.length ? `<span class="linkcount" title="${links.length} link${links.length>1?"s":""}">${icon("link","sm")}${links.length}</span>` : "",
       needsLog(x) ? `<button type="button" class="nolog" data-nolog="${x.id}" title="Marked done with no hours logged yet">${icon("clock","sm")}Log hours</button>` : "",
     ].join("");
@@ -992,6 +1009,7 @@ function taskList(list, opts={}){
     <div class="t">
       <div class="tmain" data-open="${x.id}">
         <div class="txt">${x.pri?`${icon("flag","sm")}<span class="sr">Priority: </span>`:""}${esc(x.text)}</div>
+        ${x.notes?`<div class="tnote">${icon("note","sm")}<span>${esc(x.notes)}</span></div>`:""}
         ${meta?`<div class="meta">${meta}</div>`:""}
       </div>
       ${S.loggingFor===x.id?`<form class="timeform" data-tid="${x.id}">
@@ -1132,8 +1150,8 @@ function renderMain(){
       if(st.key==="attention"){ const parts=[]; if(st.overdue) parts.push(`${st.overdue} overdue`); if(st.unlogged) parts.push(`${st.unlogged} need hours logged`); why=parts.join(", "); }
       else if(st.key==="active") why = `${st.inProgress} in progress`;
       else if(st.key==="not_started") why = `${st.count} not started`;
-      return `<div class="panel clientcard" data-clientcard="${c.id}" style="--cc:${c.color}">
-        <h3><button type="button" class="clink" data-goto="c:${c.id}"><span class="cdot" style="background:${c.color}"></span>${esc(c.name)}</button><span class="num">${fmtH(c.hrs||0)}h/wk</span></h3>
+      return `<div class="panel clientcard" data-clientcard="${c.id}">
+        <h3><button type="button" class="clink" data-goto="c:${c.id}">${esc(c.name)}</button><span class="num">${fmtH(c.hrs||0)}h/wk</span></h3>
         <div class="kv ${st.key==="attention"?"attn":""}">${why}</div>
         ${c.staff?`<div class="kv">${icon("person","sm")} ${esc(c.staff)}</div>`:""}
         <div class="cardbtns"><button type="button" class="btn-sm" data-goto="c:${c.id}">Open</button><button type="button" class="btn-sm" data-share="${c.id}">${icon("link","sm")}Copy share link</button></div>
@@ -1145,7 +1163,6 @@ function renderMain(){
         <div class="grid">${buckets[key].map(({c,st})=>card(c,st)).join("")}</div></div>`;
     };
     m.innerHTML = `<div class="head"><h2>Clients</h2><span class="sub">${S.clients.length} on the books</span></div>
-      ${track()}
       <form class="add" id="addclient">
         <input type="text" name="name" placeholder="Client name" required autocomplete="off">
         <input type="number" name="hrs" placeholder="Hours/wk" min="0" step="0.5" style="width:110px">
@@ -1178,7 +1195,7 @@ function renderMain(){
           <button type="button" data-swap="next" ${nextC?"":"disabled"} aria-label="Next client">${icon("right")}</button>
         </div>
       </div>
-      <div class="head"><div class="titlewrap"><h2><span class="cdot big" style="background:${c.color}"></span>${esc(c.name)}</h2><span class="sub">${open().filter(x=>x.client===c.id).length} open tasks</span></div>
+      <div class="head"><div class="titlewrap"><h2>${esc(c.name)}</h2><span class="sub">${open().filter(x=>x.client===c.id).length} open tasks</span></div>
         <div class="headactions"><button type="button" class="btn-sm" data-share="${c.id}">${icon("link","sm")}Copy share link</button><button type="button" class="btn-sm danger" data-delclient="${c.id}" aria-label="Delete client" title="Delete client">${icon("trash","sm")}<span class="hide-sm">Delete client</span></button></div></div>
       <div class="clienthead facts" data-client="${c.id}">
         <div class="chrow">
@@ -1267,10 +1284,13 @@ function bind(){
 let modalTask = null; // {id, clientId, assignees, links, status} — null when the modal is closed
 function openTaskModal({taskId, clientId, due}={}){
   const x = taskId ? S.tasks.find(z=>z.id===taskId) : null;
-  modalTask = { id: x?x.id:null, clientId: x? x.client : clientId, assignees: x? [...(x.assignees||[])] : [], links: x? [...(x.links||[])] : [], status: x? (x.status||"not_started") : "not_started" };
+  modalTask = { id: x?x.id:null, clientId: x? x.client : clientId, assignees: x? [...(x.assignees||[])] : [], links: x? [...(x.links||[])] : [], status: x? (x.status||"not_started") : "not_started",
+    subtasks: x? (x.subtasks||[]).map(st=>({...st})) : [] };
   $("#taskModalTitle").textContent = x? "Edit task" : "New task";
   const f = $("#taskForm");
   f.querySelector("[name=text]").value = x? x.text : "";
+  f.querySelector("[name=notes]").value = x? (x.notes||"") : "";
+  $("#subtaskInput").value = "";
   f.querySelector("[name=due]").value = x? (x.due||"") : (due||"");
   f.querySelector("[name=est]").value = x? (x.est||"") : "";
   f.querySelector("[name=pri]").checked = x? !!x.pri : false;
@@ -1283,6 +1303,7 @@ function openTaskModal({taskId, clientId, due}={}){
   renderStatusPicker();
   renderAssignPicker();
   renderLinksList();
+  renderSubtasks();
   $("#taskModal").hidden=false;
 }
 function closeTaskModal(){ $("#taskModal").hidden=true; modalTask=null; }
@@ -1299,6 +1320,22 @@ function renderAssignPicker(){
     else modalTask.assignees.push(p);
     renderAssignPicker(); });
 }
+function renderSubtasks(){
+  const list = $("#subtaskList"), subs = modalTask.subtasks;
+  const doneN = subs.filter(st=>st.done).length;
+  $("#subtaskProgress").textContent = subs.length ? `${doneN} of ${subs.length} done` : "";
+  list.innerHTML = subs.map((st,i)=>`<li class="subrow ${st.done?"done":""}">
+      <input type="checkbox" data-subtoggle="${i}" ${st.done?"checked":""} aria-label="Subtask done">
+      <input type="text" data-subedit="${i}" value="${esc(st.text)}" aria-label="Subtask">
+      <button type="button" data-rmsub="${i}" aria-label="Remove subtask">${icon("x","sm")}</button></li>`).join("");
+  list.querySelectorAll("[data-subtoggle]").forEach(c=>c.onchange=()=>{ subs[+c.dataset.subtoggle].done = c.checked; renderSubtasks(); });
+  list.querySelectorAll("[data-subedit]").forEach(inp=>{
+    inp.onchange=()=>{ const v=inp.value.trim(); if(v) subs[+inp.dataset.subedit].text=v; else { subs.splice(+inp.dataset.subedit,1); renderSubtasks(); } };
+    inp.onkeydown=e=>{ if(e.key==="Enter"){ e.preventDefault(); inp.blur(); } }; });
+  list.querySelectorAll("[data-rmsub]").forEach(b=>b.onclick=()=>{ subs.splice(+b.dataset.rmsub,1); renderSubtasks(); });
+}
+function addSubtask(){ const inp=$("#subtaskInput"); const text=inp.value.trim(); if(!text) return;
+  modalTask.subtasks.push({id:t(), text, done:false}); inp.value=""; renderSubtasks(); inp.focus(); }
 function renderLinksList(){
   const box = $("#linksList");
   box.innerHTML = modalTask.links.map((l,i)=>`<div class="linkrow">${icon("link","sm")}<a href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.label||l.url)}</a><button type="button" data-rmlink="${i}" aria-label="Remove link">${icon("x","sm")}</button></div>`).join("");
@@ -1309,12 +1346,17 @@ $("#taskCancelBtn").onclick = closeTaskModal;
 $("#taskModal").addEventListener("click", e=>{ if(e.target.id==="taskModal") closeTaskModal(); });
 document.addEventListener("keydown", e=>{ if(e.key==="Escape" && !$("#taskModal").hidden) closeTaskModal(); });
 $("#taskDeleteBtn").onclick = ()=>{ if(modalTask?.id && confirm("Delete this task?")){ deleteTask(modalTask.id); closeTaskModal(); } };
+$("#addSubtaskBtn").onclick = addSubtask;
+$("#subtaskInput").onkeydown = e=>{ if(e.key==="Enter"){ e.preventDefault(); addSubtask(); } };
 $("#addLinkBtn").onclick = ()=>{ const label=$("#linkLabel").value.trim(); const url=$("#linkUrl").value.trim(); if(!url) return;
   modalTask.links.push({label, url}); $("#linkLabel").value=""; $("#linkUrl").value=""; renderLinksList(); };
 $("#taskForm").onsubmit = e=>{ e.preventDefault(); const d = new FormData(e.target);
   const text = d.get("text").trim(); if(!text) return;
   const clientId = modalTask.clientId || d.get("client"); if(!clientId) return;
-  const payload = { text, client_id: clientId, assignees: modalTask.assignees, due: d.get("due")||null, est: d.get("est")? +d.get("est") : null, pri: !!d.get("pri"), links: modalTask.links, status: modalTask.status, done: modalTask.status==="done" };
+  // a subtask typed but not yet added with Enter/Add still counts
+  const pending = $("#subtaskInput").value.trim(); if(pending) modalTask.subtasks.push({id:t(), text:pending, done:false});
+  const payload = { text, client_id: clientId, assignees: modalTask.assignees, due: d.get("due")||null, est: d.get("est")? +d.get("est") : null, pri: !!d.get("pri"), links: modalTask.links, status: modalTask.status, done: modalTask.status==="done",
+    notes: (d.get("notes")||"").trim(), subtasks: modalTask.subtasks };
   const editId = modalTask.id;
   closeTaskModal();
   saveTask(payload, editId);
