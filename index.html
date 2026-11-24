@@ -523,6 +523,14 @@
   .authcard button[type=submit]{background:linear-gradient(135deg,#3355E0,#7C3430);color:#fff;border:0;border-radius:var(--r);padding:10px;font-weight:600;margin-top:4px}
   .linklike{background:none;border:0;color:var(--mute);font-size:13px;text-decoration:underline;padding:0;margin-top:12px;display:block}
   .autherr{background:var(--warn-soft);color:var(--warn);font-size:13px;padding:8px 10px;border-radius:var(--r);margin-bottom:12px}
+  .authnote{background:var(--ok-soft);color:var(--ok);font-size:13px;padding:8px 10px;border-radius:var(--r);margin-bottom:12px}
+  .authlede{font-size:14px;color:var(--mute);margin:0 0 14px}
+  .authlinks{display:flex;flex-wrap:wrap;justify-content:space-between;column-gap:12px}
+  .authlinks .linklike{white-space:nowrap}
+  .authgoogle{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;background:var(--card);color:var(--ink);border:1px solid var(--line-strong);border-radius:var(--r);padding:10px;font-size:14px;font-weight:600;cursor:pointer}
+  .authgoogle:hover{background:var(--tint)}
+  .authgoogle:disabled{opacity:.6;cursor:default}
+  .authgoogle svg{width:18px;height:18px;flex:none}
   .claimlede{font-size:14px;color:var(--mute);margin:0 0 14px}
   .claimlist{display:flex;flex-direction:column;gap:6px}
   .claimbtn{border:1px solid var(--line);border-radius:var(--r);padding:10px;background:none;text-align:left;font-size:14px}
@@ -562,12 +570,31 @@
   <div class="authcard">
     <h1><svg class="brandmark" viewBox="0 0 32 32" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M2 2 H24 L30 8 H8 Z"/><path d="M6 13 H20 L26 19 H12 Z"/><path d="M10 24 H16 L22 30 H16 Z"/></svg>TourStack<small>Operations</small></h1>
     <div id="authError" class="autherr" hidden></div>
+    <div id="authNote" class="authnote" hidden></div>
     <form id="authForm">
       <input type="email" name="email" placeholder="Email" required autocomplete="email">
       <input type="password" name="password" placeholder="Password" required autocomplete="current-password" minlength="6">
       <button type="submit" id="authSubmit">Sign in</button>
     </form>
-    <button type="button" id="authToggle" class="linklike">Need an account? Sign up</button>
+    <div class="claimor">or</div>
+    <button type="button" id="authGoogle" class="authgoogle"><svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>Continue with Google</button>
+    <div class="authlinks">
+      <button type="button" id="authToggle" class="linklike">Need an account? Sign up</button>
+      <button type="button" id="authForgot" class="linklike">Forgot password?</button>
+    </div>
+  </div>
+</div>
+
+<div id="resetScreen" class="authwrap" hidden>
+  <div class="authcard">
+    <h1><svg class="brandmark" viewBox="0 0 32 32" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M2 2 H24 L30 8 H8 Z"/><path d="M6 13 H20 L26 19 H12 Z"/><path d="M10 24 H16 L22 30 H16 Z"/></svg>TourStack<small>Operations</small></h1>
+    <p class="authlede">Choose a new password for your account.</p>
+    <div id="resetError" class="autherr" hidden></div>
+    <form id="resetForm">
+      <input type="password" name="password" placeholder="New password" required autocomplete="new-password" minlength="6">
+      <input type="password" name="confirm" placeholder="Repeat new password" required autocomplete="new-password" minlength="6">
+      <button type="submit" id="resetSubmit">Save new password</button>
+    </form>
   </div>
 </div>
 
@@ -662,7 +689,13 @@ function t(){return Math.random().toString(36).slice(2,9)}
 
 const SUPABASE_URL = "https://oorjrhiiejwcoinqireq.supabase.co";
 const SUPABASE_KEY = "sb_publishable_B0MtkyQ580H-mPcB5VaM3A_vNxSG6D2";
+// Read the URL hash before Supabase consumes it: a password-reset email link lands here
+// with "type=recovery", and an expired or reused link lands with an error description.
+const AUTH_HASH = new URLSearchParams(location.hash.replace(/^#/, ""));
+const RECOVERY_LINK = AUTH_HASH.get("type") === "recovery";
+const AUTH_LINK_ERROR = AUTH_HASH.get("error_description");
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+sb.auth.onAuthStateChange(event => { if(event === "PASSWORD_RECOVERY") showResetScreen(); });
 
 let S = {
   clients:[], tasks:[], timeEntries:[], staff:[], freelancers:[],
@@ -794,8 +827,21 @@ function toast(m){ const el=$("#toast"); el.textContent=m; el.classList.add("sho
 let authMode = "signin";
 async function initAuth(){
   const {data:{session}} = await sb.auth.getSession();
-  if(!session){ $("#loadingScreen").hidden=true; $("#authScreen").hidden=false; return; }
+  if(session && RECOVERY_LINK){ showResetScreen(); return; }
+  if(!session){
+    $("#loadingScreen").hidden=true; $("#authScreen").hidden=false;
+    if(AUTH_LINK_ERROR){
+      $("#authError").textContent = "That link has expired or was already used. Type your email and tap Forgot password to get a new one.";
+      $("#authError").hidden=false;
+      history.replaceState(null, "", location.pathname);
+    }
+    return;
+  }
   await afterSignIn(session);
+}
+function showResetScreen(){
+  $("#loadingScreen").hidden=true; $("#authScreen").hidden=true; $("#claimScreen").hidden=true; $("#app").hidden=true;
+  $("#resetScreen").hidden=false;
 }
 async function afterSignIn(session){
   $("#loadingScreen").hidden=false; $("#authScreen").hidden=true; $("#claimScreen").hidden=true; $("#app").hidden=true;
@@ -1371,10 +1417,53 @@ $("#mAccountBtn").onclick=()=>{S.view="more";render();};
 $("#authToggle").onclick=()=>{ authMode = authMode==="signin"?"signup":"signin";
   $("#authSubmit").textContent = authMode==="signin"?"Sign in":"Create account";
   $("#authToggle").textContent = authMode==="signin"?"Need an account? Sign up":"Have an account? Sign in";
-  $("#authError").hidden=true; };
+  $("#authForgot").hidden = authMode!=="signin";
+  $("#authError").hidden=true; $("#authNote").hidden=true; };
+$("#authForgot").onclick=async ()=>{
+  const email = $("#authForm").elements.email.value.trim();
+  $("#authError").hidden=true; $("#authNote").hidden=true;
+  if(!email){ $("#authError").textContent="Type your email above first, then tap Forgot password."; $("#authError").hidden=false; return; }
+  const btn = $("#authForgot"); btn.disabled = true;
+  const {error} = await sb.auth.resetPasswordForEmail(email, {redirectTo: location.origin + "/"});
+  btn.disabled = false;
+  if(error){ $("#authError").textContent=error.message; $("#authError").hidden=false; return; }
+  $("#authNote").textContent = "If there's an account for "+email+", a reset link is on its way. Check your spam folder too.";
+  $("#authNote").hidden=false;
+};
+$("#authGoogle").onclick=async ()=>{
+  $("#authError").hidden=true; $("#authNote").hidden=true;
+  const btn = $("#authGoogle"); btn.disabled = true;
+  // Check Google is switched on in Supabase first, so nobody lands on a raw error page.
+  let googleOn = true;
+  try {
+    const s = await fetch(SUPABASE_URL + "/auth/v1/settings", {headers:{apikey:SUPABASE_KEY}}).then(r=>r.json());
+    googleOn = !!(s && s.external && s.external.google);
+  } catch(err) {}
+  if(!googleOn){
+    btn.disabled = false;
+    $("#authError").textContent = "Google sign-in isn't switched on yet. Use your email and password for now.";
+    $("#authError").hidden=false; return;
+  }
+  const {error} = await sb.auth.signInWithOAuth({provider:"google", options:{redirectTo: location.origin + "/"}});
+  if(error){ btn.disabled = false; $("#authError").textContent=error.message; $("#authError").hidden=false; }
+};
+$("#resetForm").onsubmit=async e=>{ e.preventDefault(); const d=new FormData(e.target);
+  const password=d.get("password"), confirm=d.get("confirm");
+  $("#resetError").hidden=true;
+  if(password!==confirm){ $("#resetError").textContent="The two passwords don't match."; $("#resetError").hidden=false; return; }
+  $("#resetSubmit").disabled=true;
+  const {error} = await sb.auth.updateUser({password});
+  $("#resetSubmit").disabled=false;
+  if(error){ $("#resetError").textContent=error.message; $("#resetError").hidden=false; return; }
+  history.replaceState(null, "", location.pathname);
+  e.target.reset(); $("#resetScreen").hidden=true;
+  toast("Password updated");
+  const {data:{session}} = await sb.auth.getSession();
+  await afterSignIn(session);
+};
 $("#authForm").onsubmit=async e=>{ e.preventDefault(); const d=new FormData(e.target);
   const email=d.get("email").trim(), password=d.get("password");
-  $("#authError").hidden=true;
+  $("#authError").hidden=true; $("#authNote").hidden=true;
   const {data,error} = authMode==="signin"
     ? await sb.auth.signInWithPassword({email,password})
     : await sb.auth.signUp({email,password});
