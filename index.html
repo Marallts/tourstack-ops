@@ -958,7 +958,7 @@ function renderNav(){
   b("Hours","hours",null,icon("clock"));
   // Clients is a full-size section like the others; each client sits under it as a smaller, indented sub-item
   b("Clients","clients",null,icon("clients"),"navsection");
-  S.clients.forEach(c=>b(c.name,"c:"+c.id,open().filter(x=>x.client===c.id).length,"","sub"));
+  S.clients.forEach(c=>b(c.name,"c:"+c.id,null,"","sub"));
   renderTabbar();
 }
 
