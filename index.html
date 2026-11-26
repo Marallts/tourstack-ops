@@ -894,10 +894,10 @@ async function renderPublicShare(clientId){
       // latest date first, so the client sees the most recent work at the top; undated tasks go last
       rows: parsed.filter(p=>p.statusKey===key).sort((a,b)=>{ if(!a.due && !b.due) return 0; if(!a.due) return 1; if(!b.due) return -1; return b.due.localeCompare(a.due); }) }))
       .filter(g=>g.rows.length);
-    // open/closed: what's on screen right now wins (so a refresh never snaps a group shut), then the visitor's
-    // saved choice, then the default — current work open, finished work closed unless it's all there is
+    // open/closed: what's on screen right now wins (so a refresh never changes what the visitor opened), then
+    // their saved choice; otherwise every group starts closed, so the page opens as a short overview
     const onScreen = {}; c.querySelectorAll("details.sgroup").forEach(d=>onScreen[d.dataset.key]=d.open);
-    const isOpen = g => g.key in onScreen ? onScreen[g.key] : g.key in openPref ? openPref[g.key] : (g.key!=="done" || groups.length===1);
+    const isOpen = g => g.key in onScreen ? onScreen[g.key] : g.key in openPref ? openPref[g.key] : false;
     const sections = groups.map(g=>{
       const long = g.rows.length > PREVIEW + 5;
       const shown = long && !showAll[g.key] ? g.rows.slice(0,PREVIEW) : g.rows;
