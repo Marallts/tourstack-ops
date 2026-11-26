@@ -77,9 +77,6 @@
   .nav button.sub{font-size:13.5px;font-weight:500;padding:5px 10px 5px 36px;gap:9px;color:var(--mute)}
   .nav button.sub:hover{color:var(--ink)}
   .nav button.sub.on{color:var(--route);font-weight:600}
-  .nav button.sub .cnt{font-size:11.5px}
-  .nav .cnt{font-size:12px;font-weight:600;color:var(--mute);border-radius:10px;padding:1px 6px;min-width:22px;text-align:center}
-  .nav button.on .cnt{background:#fff;color:#1C1D1F}
   .nav .grp{color:var(--mute);font-size:12px;font-weight:600;margin:14px 0 4px 10px}
   .nav button.grp{background:none;border:0;padding:0;width:auto;text-align:left;cursor:pointer}
   .nav button.grp:hover{color:var(--ink)}
@@ -951,14 +948,14 @@ function render(){ renderNav(); renderMain(); }
 
 function renderNav(){
   const n = $("#nav"); n.innerHTML="";
-  const b=(label,view,cnt,lead,cls)=>{ const el=document.createElement("button"); el.className=[S.view===view?"on":"",cls||""].join(" ").trim(); el.innerHTML=`${lead||""}<span class="lbl">${esc(label)}</span>${cnt?`<span class="cnt">${cnt}</span>`:""}`; el.onclick=()=>{S.view=view;render();}; n.appendChild(el); };
-  b("Calendar","cal",open().length,icon("cal"));
-  b("Staff","staff",open().filter(x=>(x.assignees||[]).some(a=>S.staff.some(st=>st.name===a))).length,icon("staff"));
-  b("Freelancers","free",open().filter(x=>(x.assignees||[]).some(a=>(S.freelancers||[]).some(f=>f.name===a))).length,icon("person"));
-  b("Hours","hours",null,icon("clock"));
+  const b=(label,view,lead,cls)=>{ const el=document.createElement("button"); el.className=[S.view===view?"on":"",cls||""].join(" ").trim(); el.innerHTML=`${lead||""}<span class="lbl">${esc(label)}</span>`; el.onclick=()=>{S.view=view;render();}; n.appendChild(el); };
+  b("Calendar","cal",icon("cal"));
+  b("Staff","staff",icon("staff"));
+  b("Freelancers","free",icon("person"));
+  b("Hours","hours",icon("clock"));
   // Clients is a full-size section like the others; each client sits under it as a smaller, indented sub-item
-  b("Clients","clients",null,icon("clients"),"navsection");
-  S.clients.forEach(c=>b(c.name,"c:"+c.id,open().filter(x=>x.client===c.id).length,"","sub"));
+  b("Clients","clients",icon("clients"),"navsection");
+  S.clients.forEach(c=>b(c.name,"c:"+c.id,"","sub"));
   renderTabbar();
 }
 
