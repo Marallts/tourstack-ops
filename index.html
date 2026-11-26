@@ -246,7 +246,7 @@
 
   /* public client share page (unauthenticated, read-only) */
   .shareview{background:var(--brandgrad);min-height:100vh;display:flex;justify-content:center;padding:44px 20px}
-  .shareview .wrap{max-width:640px;width:100%;margin:0;padding:36px 32px 44px;background:var(--card);border:1px solid var(--line);border-radius:24px;box-shadow:0 24px 60px rgba(0,0,0,.18);align-self:flex-start}
+  .shareview .wrap{max-width:680px;width:100%;margin:0;padding:36px 32px 44px;background:var(--card);border:1px solid var(--line);border-radius:24px;box-shadow:0 24px 60px rgba(0,0,0,.18);align-self:flex-start}
   .sharebrand{display:flex;align-items:center;gap:7px;color:var(--mute);font-size:13px;font-weight:600;margin-bottom:22px}
   .sharebrand .brandmark{width:16px;height:16px;color:var(--mute)}
   .shareview h1{font-size:24px;font-weight:600;margin:0 0 4px;letter-spacing:-.02em}
@@ -255,23 +255,36 @@
   .shareview .prog .bar{height:10px;background:var(--tint);border-radius:999px;overflow:hidden}
   .shareview .prog .fill{height:100%;background:linear-gradient(90deg, #16A34A 0%, #4ADE80 100%)}
   .shareview .prog .lbl{display:flex;justify-content:space-between;font-size:13px;color:var(--mute);margin-top:6px}
-  .sgroup{margin-bottom:22px}
-  .sgroup h3{font-size:13px;color:var(--mute);font-weight:600;margin:0 0 8px}
-  .sghead{display:flex;align-items:center;gap:7px}
-  .sghead::before{content:"";width:7px;height:7px;border-radius:50%;flex:none}
-  .sghead.st-not_started::before{background:var(--line)}
-  .sghead.st-in_progress::before{background:#D9A63E}
-  .sghead.st-done::before{background:var(--ok)}
-  .sghead span{color:var(--mute);font-weight:400}
-  .slist{list-style:none;margin:0;padding:0;background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden}
-  .sgroup.st-not_started .slist{background:var(--tint)}
-  .sgroup.st-in_progress .slist{background:#FBEFD9}
-  .sgroup.st-done .slist{background:var(--ok-soft)}
-  .srow{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 14px;border-top:1px solid var(--line)}
+  /* tasks are grouped by status; each group is a white card the client can open or close by tapping its header */
+  .stools{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 2px 10px}
+  .stools h2{font-size:13px;font-weight:600;color:var(--mute);margin:0}
+  .stoggle{background:none;border:0;padding:4px 6px;margin-right:-6px;font-size:13px;font-weight:600;color:var(--mute);border-radius:6px}
+  .sgroup{margin-bottom:12px;background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden}
+  .sghead{list-style:none;display:flex;align-items:center;gap:10px;padding:14px 16px;cursor:pointer;font-size:15px;font-weight:600;user-select:none;-webkit-tap-highlight-color:transparent}
+  .sghead::-webkit-details-marker{display:none}
+  .sghead:focus-visible{outline-offset:-2px;border-radius:var(--r-lg)}
+  .sgroup[open] > .sghead{border-bottom:1px solid var(--line)}
+  .sdot{width:9px;height:9px;border-radius:50%;flex:none}
+  .st-not_started .sdot{background:#fff;box-shadow:inset 0 0 0 2px var(--faint)}
+  .st-in_progress .sdot{background:#D9A63E}
+  .st-done .sdot{background:var(--ok)}
+  .scount{font-size:12px;font-weight:600;color:var(--mute);background:var(--tint);border-radius:999px;padding:1px 8px;font-variant-numeric:tabular-nums}
+  .sghead .chev{margin-left:auto;color:var(--faint);transition:transform .15s ease}
+  .sgroup[open] > .sghead .chev{transform:rotate(180deg)}
+  .slist{list-style:none;margin:0;padding:0}
+  .srow{display:flex;justify-content:space-between;align-items:baseline;gap:16px;padding:12px 16px;border-top:1px solid var(--line)}
   .srow:first-child{border-top:0}
-  .srow .stxt{font-size:14px}
-  .sright{display:flex;align-items:center;gap:8px;flex-shrink:0}
-  .sdue{font-size:13px;color:var(--mute);font-variant-numeric:tabular-nums;white-space:nowrap}
+  /* pre-line keeps the line breaks a task was written with, so longer notes stay readable */
+  .stxt{font-size:15px;line-height:1.45;min-width:0;overflow-wrap:anywhere;white-space:pre-line}
+  .st-done .stxt{color:var(--mute)}
+  .sdue{font-size:13px;color:var(--mute);font-variant-numeric:tabular-nums;white-space:nowrap;flex:none}
+  /* long groups show their most recent tasks first, with a button to reveal the rest */
+  .smore{display:block;width:100%;padding:12px 16px;border:0;border-top:1px solid var(--line);background:none;text-align:left;font-size:14px;font-weight:600;color:var(--mute)}
+  @media (hover:hover){
+    .stoggle:hover{color:var(--ink);background:var(--tint)}
+    .sghead:hover{background:var(--tint)}
+    .smore:hover{background:var(--tint);color:var(--ink)}
+  }
   .stpill{font-size:12px;font-weight:600;padding:2px 9px;border-radius:10px;white-space:nowrap}
   .stpill.done{background:var(--tint);color:var(--sharecolor,var(--route))}
   .stpill.prog{background:#FBEFD9;color:#8A6A1E}
@@ -280,6 +293,10 @@
   @media (max-width:760px){
     .shareview{padding:0}
     .shareview .wrap{border-radius:24px 24px 0 0;border:0;margin-top:28px;min-height:calc(100vh - 28px);padding:28px 20px 44px}
+  }
+  @media (max-width:520px){
+    /* on phones the date sits under the task instead of squeezing it */
+    .srow{flex-direction:column;align-items:flex-start;gap:2px}
   }
 
   /* calendar */
@@ -438,7 +455,7 @@
   }
   /* ---------- consistent elevation: applied once, everywhere, instead of ad-hoc shadows ---------- */
   /* every "frame" — panels, rows, cards — gets the same soft lift off the page */
-  .panel, .clienthead, .tasks, .authcard, .slist, .morelist {
+  .panel, .clienthead, .tasks, .authcard, .sgroup, .morelist {
     box-shadow: var(--shadow-card);
   }
   /* every clickable button gets the same small lift, a touch more on hover, and presses
@@ -558,6 +575,7 @@
   <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="9" r="3.5"/><circle cx="12" cy="12" r="9"/><path d="M6.2 18.7c1.2-2.3 3.3-3.4 5.8-3.4s4.6 1.1 5.8 3.4"/></symbol>
   <symbol id="i-checklist" viewBox="0 0 24 24"><path d="M4 7l2 2 3.5-3.5M4 15.5l2 2 3.5-3.5M12.5 8h7.5M12.5 16.5h7.5"/></symbol>
   <symbol id="i-note" viewBox="0 0 24 24"><path d="M6 3.5h8.5L19 8v12.5H6z"/><path d="M14 3.5V8.5h5M9 13h7M9 16.5h5"/></symbol>
+  <symbol id="i-down" viewBox="0 0 24 24"><path d="M6 9.5l6 6 6-6"/></symbol>
   <symbol id="i-sort" viewBox="0 0 24 24"><path d="M7 4.5v15M3.5 16L7 19.5 10.5 16M14 7h6.5M14 12h4.5M14 17h2.5"/></symbol>
 </svg>
 <div id="loadingScreen"><svg class="brandmark" viewBox="0 0 32 32" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M2 2 H24 L30 8 H8 Z"/><path d="M6 13 H20 L26 19 H12 Z"/><path d="M10 24 H16 L22 30 H16 Z"/></svg></div>
@@ -853,36 +871,80 @@ let shareRefreshTimer = null;
 async function renderPublicShare(clientId){
   $("#loadingScreen").hidden=false; $("#authScreen").hidden=true; $("#claimScreen").hidden=true; $("#app").hidden=true;
   const fmtLong = d => { if(!d) return ""; const dt=new Date(d+"T00:00"); return dt.toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"}); };
+  const shareHeader = `<div class="sharebrand"><svg class="brandmark" viewBox="0 0 32 32" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M2 2 H24 L30 8 H8 Z"/><path d="M6 13 H20 L26 19 H12 Z"/><path d="M10 24 H16 L22 30 H16 Z"/></svg>TourStack</div>`;
+  // what's happening now comes first, then what's next, then the finished work
+  const order = [["in_progress","In progress"],["not_started","Not started"],["done","Done"]];
+  const PREVIEW = 10; // a group of more than 15 tasks shows its 10 most recent plus a "Show all" button
+                      // (shorter groups show in full: hiding just a few rows behind a button isn't worth the click)
+  // groups the visitor opened or closed themselves are remembered on their browser, per client
+  const prefKey = "tsShareOpen:"+clientId;
+  let openPref = {}; try{ openPref = JSON.parse(localStorage.getItem(prefKey)||"{}") || {}; }catch(_){}
+  const savePref = () => { try{ localStorage.setItem(prefKey, JSON.stringify(openPref)); }catch(_){} };
+  const showAll = {};
+  let lastSig = "", data = null;
+
+  const draw = () => {
+    const {row, tasks} = data;
+    const c = $("#shareContent");
+    $("#shareScreen").style.setProperty("--sharecolor", row.color);
+    const parsed = (tasks||[]).map(t=>({ text:t.text, statusKey:t.status||"not_started", due:t.due }));
+    const total=parsed.length, done=parsed.filter(p=>p.statusKey==="done").length;
+    const pct = total? Math.round(done/total*100) : 0;
+    const groups = order.map(([key,label])=>({ key, label,
+      // latest date first, so the client sees the most recent work at the top; undated tasks go last
+      rows: parsed.filter(p=>p.statusKey===key).sort((a,b)=>{ if(!a.due && !b.due) return 0; if(!a.due) return 1; if(!b.due) return -1; return b.due.localeCompare(a.due); }) }))
+      .filter(g=>g.rows.length);
+    // open/closed: what's on screen right now wins (so a refresh never snaps a group shut), then the visitor's
+    // saved choice, then the default — current work open, finished work closed unless it's all there is
+    const onScreen = {}; c.querySelectorAll("details.sgroup").forEach(d=>onScreen[d.dataset.key]=d.open);
+    const isOpen = g => g.key in onScreen ? onScreen[g.key] : g.key in openPref ? openPref[g.key] : (g.key!=="done" || groups.length===1);
+    const sections = groups.map(g=>{
+      const long = g.rows.length > PREVIEW + 5;
+      const shown = long && !showAll[g.key] ? g.rows.slice(0,PREVIEW) : g.rows;
+      const rowsHtml = shown.map(p=>`<li class="srow"><span class="stxt">${esc(p.text)}</span>${p.due?`<span class="sdue">${fmtLong(p.due)}</span>`:""}</li>`).join("");
+      const more = long ? `<button type="button" class="smore" data-more="${g.key}">${showAll[g.key] ? "Show fewer" : `Show all ${g.rows.length}`}</button>` : "";
+      return `<details class="sgroup st-${g.key}" data-key="${g.key}"${isOpen(g)?" open":""}><summary class="sghead"><span class="sdot"></span>${g.label}<span class="scount">${g.rows.length}</span>${icon("down","chev")}</summary><ul class="slist">${rowsHtml}</ul>${more}</details>`;
+    }).join("");
+    const tools = groups.length>1 ? `<div class="stools"><h2>Tasks</h2><button type="button" class="stoggle" id="shareToggleAll"></button></div>` : "";
+    c.innerHTML = shareHeader + `<h1>${esc(row.name)}</h1>
+      <div class="smeta">Live progress, updated ${fmtLong(today())}</div>
+      <div class="prog"><div class="bar"><div class="fill" style="width:${pct}%"></div></div><div class="lbl"><span>${done} of ${total} complete</span><span>${pct}%</span></div></div>
+      ${sections ? tools + sections : `<div class="smeta">No tasks yet.</div>`}
+      <footer>Shared from TourStack — this page updates automatically.</footer>`;
+
+    const dets = [...c.querySelectorAll("details.sgroup")];
+    const toggleAll = $("#shareToggleAll");
+    const syncToggle = () => { if(toggleAll) toggleAll.textContent = dets.every(d=>d.open) ? "Collapse all" : "Expand all"; };
+    dets.forEach(d=>{
+      // the click lands just before the group flips, so the new state is the opposite of the current one
+      d.querySelector("summary").addEventListener("click", ()=>{ openPref[d.dataset.key] = !d.open; savePref(); });
+      d.addEventListener("toggle", syncToggle);
+    });
+    if(toggleAll) toggleAll.onclick = () => { const open = !dets.every(d=>d.open); dets.forEach(d=>{ d.open=open; openPref[d.dataset.key]=open; }); savePref(); syncToggle(); };
+    c.querySelectorAll("[data-more]").forEach(b=>b.onclick=()=>{ const k=b.dataset.more; showAll[k]=!showAll[k]; draw();
+      // after "Show fewer" the list shrinks, so bring that group's header back into view
+      if(!showAll[k]) c.querySelector(`details[data-key="${k}"]`)?.scrollIntoView({block:"nearest"}); });
+    syncToggle();
+    $("#loadingScreen").hidden=true; $("#shareScreen").hidden=false;
+  };
+
   const paint = async () => {
     const [{data:info,error:e1},{data:tasks,error:e2}] = await Promise.all([
       sb.rpc("get_client_share_info",{share_client_id:clientId}),
       sb.rpc("get_client_share_tasks",{share_client_id:clientId}),
     ]);
     const row = (info && info[0]) || null;
-    const shareHeader = `<div class="sharebrand"><svg class="brandmark" viewBox="0 0 32 32" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M2 2 H24 L30 8 H8 Z"/><path d="M6 13 H20 L26 19 H12 Z"/><path d="M10 24 H16 L22 30 H16 Z"/></svg>TourStack</div>`;
     if(e1 || e2 || !row){
+      if(data) return; // a refresh that fails keeps the page the client is already reading
       $("#shareContent").innerHTML = shareHeader + `<h1>Link not found</h1><p class="smeta">This share link doesn't point to a client we know about — check it was copied in full.</p>`;
       $("#loadingScreen").hidden=true; $("#shareScreen").hidden=false;
       return;
     }
-    $("#shareScreen").style.setProperty("--sharecolor", row.color);
-    const parsed = (tasks||[]).map(t=>({ text:t.text, statusKey:t.status||"not_started", status:STATUS_LABELS[t.status||"not_started"]||"Not started", due:t.due }));
-    const order = [["done","Done"],["in_progress","In progress"],["not_started","Not started"]];
-    const total=parsed.length, done=parsed.filter(p=>p.statusKey==="done").length;
-    const pct = total? Math.round(done/total*100) : 0;
-    const sections = order.map(([key,label])=>{
-      // latest date first, so the client sees the most recent work at the top; undated tasks go last
-      const rows = parsed.filter(p=>p.statusKey===key).sort((a,b)=>{ if(!a.due && !b.due) return 0; if(!a.due) return 1; if(!b.due) return -1; return b.due.localeCompare(a.due); });
-      if(!rows.length) return "";
-      const rowsHtml = rows.map(p=>`<li class="srow"><span class="stxt">${esc(p.text)}</span>${p.due?`<span class="sdue">${fmtLong(p.due)}</span>`:""}</li>`).join("");
-      return `<div class="sgroup st-${key}"><h3 class="sghead st-${key}">${label}<span>${rows.length}</span></h3><ul class="slist">${rowsHtml}</ul></div>`;
-    }).join("");
-    $("#shareContent").innerHTML = shareHeader + `<h1>${esc(row.name)}</h1>
-      <div class="smeta">Live progress, updated ${fmtLong(today())}</div>
-      <div class="prog"><div class="bar"><div class="fill" style="width:${pct}%"></div></div><div class="lbl"><span>${done} of ${total} complete</span><span>${pct}%</span></div></div>
-      ${sections || `<div class="smeta">No tasks yet.</div>`}
-      <footer>Shared from TourStack — this page updates automatically.</footer>`;
-    $("#loadingScreen").hidden=true; $("#shareScreen").hidden=false;
+    // only redraw when something actually changed, so the page doesn't jump under the reader every 45s
+    const sig = JSON.stringify([row, tasks, today()]);
+    if(sig===lastSig) return;
+    lastSig = sig; data = {row, tasks};
+    draw();
   };
   await paint();
   clearInterval(shareRefreshTimer);
